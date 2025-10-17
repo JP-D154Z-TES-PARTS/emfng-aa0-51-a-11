@@ -1,0 +1,4400 @@
+/* emfng-pa000-5000-a-M4 */
+/*********************************************************************/
+/*  Copyright Toyota Motor Corporation                               */
+/*********************************************************************/
+
+/*********************************************************************/
+/* ƒIƒuƒWƒFƒNƒg–¼ |  ¸‰ÎŒŸoˆÙí”»’è•”                              */
+/* ’ˆÓ–€       | y¸‰ÎOBD—LzAND(y4‹C“›zORy6‹C“›z)           */
+/*-------------------------------------------------------------------*/
+/*     ŒÂ•Ê•ÏX—š—ğ iŒÂ•Ê•ÏX‚ÍˆÈ‰º‚É•ÏX“úA“à—e‚ğ‹L“ü‚·‚é‚±‚Æj */
+/*********************************************************************/
+
+/*-------------------------------------------------------------------*/
+/* ƒwƒbƒ_ƒtƒ@ƒCƒ‹‚ÌƒCƒ“ƒNƒ‹[ƒh                                      */
+/*-------------------------------------------------------------------*/
+#include <../inc/common.h>
+#include <../inc/gllib.h>
+#include <engsrc/espc/ejcc.h>           /* JEEFI,JEEGTYPE,JEHIPFI_E,JEMAT_OBD2,JEMFFC */
+                                        /* JEMFHOUKI,JEMFMETHOD_D,u1g_EJCC_TIME_D,u1g_EJCC_OMEGA_D */
+                                        /* JENCYL,JEOOBD,u1g_EJCC_NCYL,JEMFDTC_D */
+                                        /* JETCORE_D,JEOBDUDS_D,JERLOK,JENGPF_E */
+                                        /* u1g_ejcc_NCYL,u1g_EJCC_DUAL,u1g_EJCC_6CYL,u1g_EJCC_4CYL,u1g_EJCC_USAMF,u1g_EJCC_NOT_USAMF,u1g_EJCC_V6CYL,u1g_EJCC_L6CYL */
+#include <engsrc/inc/elsb.h>
+#include <engsrc/inc/elib.h>
+
+#include <obd/wfh/wsentivchg.h>         /* u1g_wsentivchg_state,u1g_WSENTIVCHG_IUE,u1g_WSENTIVCHG_LVL2 */
+#include <obd/wfh/wdiaginfclr.h>        /* big_wdiaginfclr_xreqclr */
+#if JEOBDUDS_D == u1g_EJCC_USE          /*yOBDonUDS‘Î‰—Lz*/
+#include <obd/wfh/wpsajdg.h>            /* big_wpsajdg_xpsa */
+#endif
+#if JEMAT_OBD2 == u1g_EJCC_NOT_USE      /*yOBD2“K‡–³z*/
+#include <obd/wbp/wobd2msk.h>           /* big_wobd2msk_xmfKwp */
+#endif
+#if JEMFDTC_D == u1g_EJCC_USE           /*y¸‰ÎOBD DTC—Lz*/
+#include <obd/wfd/wmf_fdi.h>            /* big_wmf_fdi_xem_lstpnd,big_wmf_fdi_xot_lstpnd,big_wmf_fdi_xot_warning */
+                                        /* big_wmf_fdi_xem_warning,vdg_wmf_fdi_ot_fald_u1(),vdg_wmf_fdi_em_fald_u1(),vdg_wmf_fdi_ot_excmf() */
+                                        /* vdg_wmf_fdi_em_excmf(),vdg_wmf_fdi_mil_blink_u1(),vdg_wmf_fdi_ot_imdf(),vdg_wmf_fdi_ot_imdnf() */
+                                        /* vdg_wmf_fdi_pas_u2u1(),u1g_WMF_FDI_OUTOF_FTPCYCLE,u1g_WMF_FDI_DURING_FTPCYCLE */
+                                        /* u1g_WMF_FDI_WITHIN_FIRST1000RPM,u1g_WMF_FDI_AFTER_FIRST1000RPM,u2g_WMF_FDI_ID_OT */
+                                        /* big_wmf_fdi_xot_pnd,big_wmf_fdi_xem_pnd,vdg_wmf_fdi_ot_excmf_u2u1(),vdg_wmf_fdi_em_excmf_u2u1(),u2g_WMF_FDI_ID_EM */
+#endif
+#if ( JETCORE_D == u1g_EJCC_USE ) && ( JEOBDUDS_D == u1g_EJCC_NOT_USE )  /*yt-CORE‘Î‰—LzANDyOBDonUDS‘Î‰–³z*/
+#include <obd/wspc/wtcif.h>             /* u1g_wtcif_dem_setdtr_u2s4s4s4u1(),u2g_WTCIF_DEM_DTR_ECDMFAEM,u1g_WTCIF_DEM_DTR_CTL_NORMAL */
+                                        /* u2g_WTCIF_DEM_DTR_ECDMFEM1,u2g_WTCIF_DEM_DTR_ECDMFEM2,u2g_WTCIF_DEM_DTR_ECDMFEM3 */
+                                        /* u2g_WTCIF_DEM_DTR_ECDMFEM4,u2g_WTCIF_DEM_DTR_ECDMFEM5,u2g_WTCIF_DEM_DTR_ECDMFEM6 */
+                                        /* u2g_WTCIF_DEM_DTR_ECDMFAV1,u2g_WTCIF_DEM_DTR_ECDMFAV2,u2g_WTCIF_DEM_DTR_ECDMFAV3 */
+                                        /* u2g_WTCIF_DEM_DTR_ECDMFAV4,u2g_WTCIF_DEM_DTR_ECDMFAV5,u2g_WTCIF_DEM_DTR_ECDMFAV6,u2g_WTCIF_DEM_DTR_ECDMFAAV */
+#endif
+#if JENGPF_E != u1g_EJCC_NOT_USE        /*yGPF—Lz*/
+#include <engsrc/efunc/efuncin/egpfrgcnd/egpfrgcnd.h>              /* u1g_egpfrgcnd_exgpfrgsrv */
+#include <engsrc/efunc/eemi/egpf/egpfhtum/egpfhtum.h>              /* u1g_egpfhtum_exdth,u1g_egpfhtum_exeff */
+ #if JERLOK == u1g_EJCC_USE             /*yØ¯ÁØ°İ‰^“]‰Âz*/
+#include <engsrc/efunc/eemi/egpf/egpfrgum.h>                       /* u1g_egpfrgum_exrgact */
+ #endif
+#endif
+#include <engsrc/eserv/emem/ememctr.h>              /* s4g_ememctr_write(),s4g_ememctr_read() */
+                                                    /* u2g_EMFNG_EONEMFMLT_U1_ID,u2g_EMFNG_EXRCDMF_U1_ID */
+                                                    /* u2g_EMFNG_EOCDMFAE2MX_U1_ID,u2g_EMFNG_EOCJREVEM_U1_ID */
+                                                    /* u2g_EMFNG_EOTHWEM_S1_ID,u2g_EMFNG_EOTHAEM_S1_ID */
+                                                    /* u2g_EMFNG_EOCDMFEM2MX1_U1_ID,u2g_EMFNG_EOCDMFEM2MX2_U1_ID */
+                                                    /* u2g_EMFNG_EOCDMFEM2MX3_U1_ID,u2g_EMFNG_EOCDMFEM2MX4_U1_ID */
+                                                    /* u2g_EMFNG_EOCDMFEM2MX5_U1_ID,u2g_EMFNG_EOCDMFEM2MX6_U1_ID */
+                                                    /* u2g_EMFNG_EOSPDEMAV_U1_ID,u2g_EMFNG_EONEEMAV_U1_ID */
+                                                    /* u2g_EMFNG_EOKLSMEMAV_U1_ID,u2g_EMFNG_EOCJMFNEEMI_U1_ID */
+                                                    /* u2g_EMFNG_EOCJMFNEEML_U1_ID,u2g_EMFNG_EOCJMFNEEMH_U1_ID */
+                                                    /* u2g_EMFNG_EOCDMFAOTMX_U1_ID,u2g_EMFNG_EOCJREVOT_U1_ID */
+                                                    /* u2g_EMFNG_EOTHWOT_S1_ID,u2g_EMFNG_EOTHAOT_S1_ID */
+                                                    /* u2g_EMFNG_EOCMFNL_U2_ID,u2g_EMFNG_EOCMFNM_U2_ID */
+                                                    /* u2g_EMFNG_EOCMFNH_U2_ID,u2g_EMFNG_EOCMFMLTL_U2_ID */
+                                                    /* u2g_EMFNG_EOCMFMLTH_U2_ID,u2g_EMFNG_ECDMFAEMMXTL_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFEMMXTL1_U2_ID,u2g_EMFNG_ECDMFEMMXTL2_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFEMMXTL3_U2_ID,u2g_EMFNG_ECDMFEMMXTL4_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFEMMXTL5_U2_ID,u2g_EMFNG_ECDMFEMMXTL6_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFAAVMXTL_U2_ID,u2g_EMFNG_ECDMFAVMXTL1_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFAVMXTL2_U2_ID,u2g_EMFNG_ECDMFAVMXTL3_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFAVMXTL4_U2_ID,u2g_EMFNG_ECDMFAVMXTL5_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFAVMXTL6_U2_ID,u2g_EMFNG_ECDMFAEMTV_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFAEMMNTL_U2_ID,u2g_EMFNG_ECDMFAAVTV_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFAAVMNTL_U2_ID,u2g_EMFNG_ECDMFEMTV1_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFEMTV2_U2_ID,u2g_EMFNG_ECDMFEMTV3_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFEMTV4_U2_ID,u2g_EMFNG_ECDMFEMTV5_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFEMTV6_U2_ID,u2g_EMFNG_ECDMFEMMNTL1_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFEMMNTL2_U2_ID,u2g_EMFNG_ECDMFEMMNTL3_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFEMMNTL4_U2_ID,u2g_EMFNG_ECDMFEMMNTL5_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFEMMNTL6_U2_ID,u2g_EMFNG_ECDMFAVTV1_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFAVTV2_U2_ID,u2g_EMFNG_ECDMFAVTV3_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFAVTV4_U2_ID,u2g_EMFNG_ECDMFAVTV5_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFAVTV6_U2_ID,u2g_EMFNG_ECDMFAVMNTL1_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFAVMNTL2_U2_ID,u2g_EMFNG_ECDMFAVMNTL3_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFAVMNTL4_U2_ID,u2g_EMFNG_ECDMFAVMNTL5_U2_ID */
+                                                    /* u2g_EMFNG_ECDMFAVMNTL6_U2_ID */
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE ) /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+#include <engsrc/eactmedi/einj/eminj.h>             /* s2g_eminj_ekpfi */
+#endif
+#include <engsrc/estate/esin/ene.h>                 /* s2g_ene_ene */
+#include <engsrc/estate/esin/espd.h>                /* s2g_espd_espd */
+#include <engsrc/estate/esin/etha.h>                /* s2g_etha_etha */
+#include <engsrc/estate/estepin/exst.h>             /* u1g_exst_exastnrm */
+#include <engsrc/etranfwd/etemp/ethw.h>             /* s2g_ethw_ethw */
+#include <engsrc/espc/eengspc.h>                    /* u1g_eengspc_ewcnvt_tbl[] */
+#include <eng/ekl/eklset.h>                         /* s2g_eklset_eklsm */
+
+#if ( JEOOBD == u1g_EJCC_USE ) && ( JENCYL == u1g_EJCC_6CYL )   /*ysê’²¸—LzANDy6‹C“›z*/
+#include <eng/eobd/eobdsm.h>            /* s2g_eobdsm_enejsm */
+#endif
+
+#include <eng/emf/emfcc.h>              /* s2g_emfcc_edltmaxlh,s2g_emfcc_edltmaxhh */
+                                        /* s2g_emfcc_ewmaxl,s2g_emfcc_ewmaxh */
+#include <eng/emf/emfccrnk.h>           /* u1g_EMFCCRNK_DLTMFL_TIMMING,s2g_emfccrnk_edltmflxh[] */
+                                        /* u1g_EMFCCRNK_DDTCRX_TIMMING,s2g_emfccrnk_eddtcrxh[] */
+                                        /* s2g_emfccrnk_ewmfl[],s2g_emfccrnk_ewmfh[],s2g_emfccrnk_ewmfhp[] */
+#include <eng/emf/emfcnt.h>             /* u1g_EMFCNT_NOT,big_emfcnt_exptnup,s2g_emfcnt_MFSPD */
+                                        /* u1g_EMFCNT_LOW,u1g_EMFCNT_HIGH,u1g_EMFCNT_OPPS */
+                                        /* u1g_EMFCNT_MLT,u1g_EMFCNT_CYL() */
+#include <eng/emf/emfinftp.h>           /* big_emfinftp_exinftp */
+#include <eng/emf/emfne.h>              /* u1g_emfne_ejmfne,u1g_EMFNE_REV_IDLE1,u1g_EMFNE_REV_IDLE2 */
+                                        /* u1g_EMFNE_REV_LOW,u1g_EMFNE_REV_HIGH */
+#include <eng/emf/emfok.h>              /* s2g_emfok_NGDI,s2g_emfok_NGPFI,emfok_roughcnt() */
+                                        /* emfok_mfneld_set(),emfok_mfareacnt_ann_u1u1() */
+                                        /* emfok_mfneld_ann(),emfok_mfcmodclr() */
+
+#if JEMFFC == u1g_EJCC_USE              /*yG”}OT¸‰ÎˆÙíFC—Lz*/
+#include <eng/emf/emffc.h>              /* u1g_emffc_exfcbi */
+#endif
+
+#include <eng/emf/emfng.h>
+
+/*-------------------------------------------------------------------*/
+/* ƒRƒ“ƒpƒCƒ‰ƒo[ƒWƒ‡ƒ“’è‹`                                          */
+/*-------------------------------------------------------------------*/
+#define MK32_ID                         (0x00000040)             /* R9ƒRƒ“ƒpƒCƒ‰‚ğg—p */
+
+#ifdef __GHS_VERSION_NUMBER
+ #if ( ( __GHS_VERSION_NUMBER >= 201355 ) \
+    && ( __GHS_VERSION_NUMBER < 201400 ) )
+ #else
+  #error "ƒRƒ“ƒpƒCƒ‹‚³‚ê‚éƒRƒ“ƒpƒCƒ‰‚ªˆÙ‚È‚Á‚Ä‚¢‚Ü‚·B"
+ #endif
+#endif
+
+/*-------------------------------------------------------------------*/
+/* ƒRƒ“ƒpƒCƒ‹SW–¢’è‹`ƒ`ƒFƒbƒN                                        */
+/*-------------------------------------------------------------------*/
+#if !defined JEEFI
+#error "JEEFI is undeclared"
+#endif
+
+#if !defined JEEGTYPE
+#error "JEEGTYPE is undeclared"
+#endif
+
+#if !defined JEHIPFI_E
+#error "JEHIPFI_E is undeclared"
+#endif
+
+#if !defined JEMAT_OBD2
+#error "JEMAT_OBD2 is undeclared"
+#endif
+
+#if !defined JEMFFC
+#error "JEMFFC is undeclared"
+#endif
+
+#if !defined JEMFHOUKI
+#error "JEMFHOUKI is undeclared"
+#endif
+
+#if !defined JEMFMETHOD_D
+#error "JEMFMETHOD_D is undeclared"
+#endif
+
+#if !defined u1g_EJCC_TIME_D
+#error "u1g_EJCC_TIME_D is undeclared"
+#endif
+
+#if !defined u1g_EJCC_OMEGA_D
+#error "u1g_EJCC_OMEGA_D is undeclared"
+#endif
+
+#if !defined JENCYL
+#error "JENCYL is undeclared"
+#endif
+
+#if !defined JEOOBD
+#error "JEOOBD is undeclared"
+#endif
+
+#if !defined u1g_EJCC_NCYL
+#error "u1g_EJCC_NCYL is undeclared"
+#endif
+
+#if !defined JEMFDTC_D
+#error "JEMFDTC_D is undeclared"
+#endif
+
+#if !defined JETCORE_D
+#error "JETCORE_D is undeclared"
+#endif
+
+#if !defined JEOBDUDS_D
+#error "JEOBDUDS_D is undeclared"
+#endif
+
+#if !defined JERLOK
+#error "JERLOK is undeclared"
+#endif
+
+#if !defined JENGPF_E
+#error "JENGPF_E is undeclared"
+#endif
+
+#if !defined u1g_EJCC_DUAL
+#error "u1g_EJCC_DUAL is undeclared"
+#endif
+
+#if !defined u1g_EJCC_6CYL
+#error "u1g_EJCC_6CYL is undeclared"
+#endif
+
+#if !defined u1g_EJCC_4CYL
+#error "u1g_EJCC_4CYL is undeclared"
+#endif
+
+#if !defined u1g_EJCC_USAMF
+#error "u1g_EJCC_USAMF is undeclared"
+#endif
+
+#if !defined u1g_EJCC_NOT_USAMF
+#error "u1g_EJCC_NOT_USAMF is undeclared"
+#endif
+
+#if !defined u1g_EJCC_V6CYL
+#error "u1g_EJCC_V6CYL is undeclared"
+#endif
+
+#if !defined u1g_EJCC_L6CYL
+#error "u1g_EJCC_L6CYL is undeclared"
+#endif
+
+/*-------------------------------------------------------------------*/
+/* “K‡’l                                                            */
+/*-------------------------------------------------------------------*/
+
+/*-------------------------------------------------------------------*/
+/* Œ^’è‹`                                                            */
+/*-------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------*/
+/* macro’è‹`                                                           */
+/*---------------------------------------------------------------------*/
+/* $$$ƒ}ƒNƒ’è”_•W€_v4.11 */
+#define u1s_EMFNG_MFSTOTI ((u1)(((173.)/(1.))+0.5))                     /* m=emfng,lsb=1,ofs=,unit=‰ñ :±²ÄŞÙ’†‘S‹C“›¸‰Î‰ñ””»’è’lãŒÀ */
+
+#if (JETCORE_D == u1g_EJCC_USE) && (JEOBDUDS_D == u1g_EJCC_USE)         /* yt-CORE‘Î‰—LzANDyOBDonUDS‘Î‰—Lz */
+#define u1s_EMFNG_CXMF1PAS ((u1)(((0.)/(1.))+0.5))                      /* m=emfng,lsb=1,ofs=,unit=‰ñ :ƒŒƒfƒBƒlƒX—p G”}OT¸‰Î‰ñ””»’è’l */
+#define u1s_EMFNG_CXMFPAS ((u1)(((0.)/(1.))+0.5))                       /* m=emfng,lsb=1,ofs=,unit=‰ñ :ƒŒƒfƒBƒlƒX—p EMˆ«‰»¸‰Î‰ñ””»’è’l */
+#endif                                                                  /* JETCORE_D JEOBDUDS_D */
+
+/* $$$ƒ}ƒNƒ’è”_•W€_v4.11 */
+
+#define u1s_EMFNG_NCYLW      ((u1)(u1g_ejcc_NCYL >> 1))       /* ‹C“›ŒQ” */
+
+/*-------------------------------------------------------------------*/
+/* •Ï”’è‹`                                                          */
+/*-------------------------------------------------------------------*/
+/* ƒOƒ[ƒoƒ‹•Ï” */
+/* emf“à‚É‚Ì‚İŒöŠJ */
+u2 u2g_emfng_ekldmfae;       /* m=emfng,lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ¸‰Î”»’è’l */
+u1 u1g_emfng_ecdmfaotbnk[2]; /* m=emfng,lsb=1,unit=‰ñ :ÊŞİ¸•ÊG”}OTÚÍŞÙ¸‰Î¶³İÀ */
+                             /* 1ƒoƒ“ƒN‚Å‚à2ƒoƒ“ƒN•ª‚Ì—Ìˆæ‚ğŠm•Û‚·‚é */
+#if JEMFFC == u1g_EJCC_USE   /*yG”}OT¸‰ÎˆÙíFC—Lz*/
+u1 u1g_emfng_exdmffc;        /* m=emfng,lsb=1 :FCµÌß¼®İ”»’è—pG”}OTÚÍŞÙˆÙí’Ê’mÌ×¸Ş */
+#endif
+u1 u1g_emfng_ecdmfaot;       /* m=emfng,lsb=1,unit=‰ñ :G”}OTÚÍŞÙ‘S‹C“›¸‰Î¶³İÀ */
+u2 u2g_emfng_ecdmfaoti;      /* m=emfng,lsb=1,unit=‰ñ :±²ÄŞÙ’†‘S‹C“›¸‰Î¶³İÀ */
+u2 u2g_emfng_ecdmfae2;       /* m=emfng,lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ‘S‹C“›¸‰Î¶³İÀ */
+u1 u1g_emfng_ecdmfaem;       /* m=emfng,lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ‘S‹C“›¸‰Î¶³İÀ */
+u2 u2g_emfng_ecjmfot;        /* m=emfng,lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev :G”}OTÚÍŞÙ¸‰ÎŒŸo‹–‰Â¶³İÀ */
+u2 u2g_emfng_ecjmfoti;       /* m=emfng,lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev :G”}OTÚÍŞÙ±²ÄŞÙ¸‰ÎŒŸo‹–‰Â¶³İÀ */
+u2 u2g_emfng_ecjmfem;        /* m=emfng,lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev :EMˆ«‰»ÚÍŞÙ¸‰ÎŒŸo‹–‰Â¶³İÀ */
+u2 u2g_emfng_ekldmfot;       /* m=emfng,lsb=1,unit=‰ñ :G”}OTÚÍŞÙ¸‰Î‰ñ””»’è’l */
+u2 u2g_emfng_ekldmfoth_mcr;  /* m=emfng,lsb=1,unit=‰ñ :G”}OTÚÍŞÙ¸‰Î‰ñ””»’è’l(ŒvZ’l) */
+u2 u2g_emfng_eldmfaem_mcr;   /* m=emfng,lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ¸‰Î‰ñ””»’è’l(ŒvZ’l) */
+
+stflag8 stg_emfng_flag1;     /* m=emfng :ƒOƒ[ƒoƒ‹ƒtƒ‰ƒO—p\‘¢‘Ì(16msl,65msl,drvclchgƒ^ƒCƒ~ƒ“ƒO) */
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+stflag8 stg_emfng_flag2;     /* m=emfng :ƒOƒ[ƒoƒ‹ƒtƒ‰ƒO—p\‘¢‘Ì(65msl,drvclchgƒ^ƒCƒ~ƒ“ƒO) */
+#endif
+#if JETCORE_D == u1g_EJCC_USE                           /*yt-CORE‘Î‰—Lz*/
+stflag8 stg_emfng_flag3;     /* m=emfng :ƒOƒ[ƒoƒ‹ƒtƒ‰ƒO—p\‘¢‘Ì(65msl,drvclchgƒ^ƒCƒ~ƒ“ƒO) */
+#endif
+u1 u1g_emfng_ecdmfem[u1g_EJCC_NCYL];    /* m=emfng,lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ‹C“›•Ê¸‰Î¶³İÀ */
+u2 u2g_emfng_ecdmfem2[u1g_EJCC_NCYL];   /* m=emfng,lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ‹C“›•Ê¸‰Î¶³İÀ */
+u1 u1g_emfng_ecdmfemi[u1g_EJCC_NCYL];   /* m=emfng,lsb=1,unit=‰ñ :±²ÄŞÙ’†‹C“›•Ê¸‰Î¶³İÀ */
+u1 u1g_emfng_ecdtmf2;                   /* m=emfng,lsb=1,unit=‰ñ :G”}OTÚÍŞÙ”»’è—pˆ«˜H¶³İÀ */
+u2 u2g_emfng_ecmfot;                    /* m=emfng,lsb=1,unit=‰ñ :•¡”‹C“›¸‰Î¶³İÀ */
+u1 u1g_emfng_ecdmfw[u1g_EJCC_NCYL/2];   /* m=emfng,lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î¶³İÀ */
+
+/* ƒXƒ^ƒeƒBƒbƒN•Ï” */
+static u1 u1s_emfng_ecjpmf;    /* lsb=1,unit=‰ñ :¾ŞÛ¸Û½¶³İÀ */
+static u2 u2s_emfng_ecdtmfwa;  /* lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ”»’è—pˆ«˜H¶³İÀ */
+static u1 u1s_emfng_ecxmf1;    /* lsb=1,unit=‰ñ :G”}OTÚÍŞÙˆÙíŒŸo‰ñ” */
+static u1 u1s_emfng_ecxmf;     /* lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙˆÙíŒŸo‰ñ” */
+static u1 u1s_emfng_ecjemrev;  /* lsb=1,unit=‰ñ :n“®ŒãEMˆ«‰»ÚÍŞÙ”»’è‰ñ” */
+#if JEOOBD == u1g_EJCC_USE     /*ysê’²¸—Lz*/
+static s4 s4s_emfng_espdaem;   /* lsb=256/256,unit=km/h :1000revŠÔ‚ÌÔ‘¬—İÏ’l */
+static s4 s4s_emfng_eneaem;    /* lsb=12800/64/256,unit=rpm :1000revŠÔ‚Ì´İ¼Şİ‰ñ“]”—İÏ’l */
+static s4 s4s_emfng_eklsmaem;  /* lsb=320/64/256,unit=% :1000revŠÔ‚Ì´İ¼Şİ•‰‰×—İÏ’l */
+static u1 u1s_emfng_ecjmfneemi; /* lsb=1,unit=‰ñ :1000revŠÔ‚Ì±²ÄŞÙÓ°ÄŞ‰ñ” */
+static u1 u1s_emfng_ecjmfneeml; /* lsb=1,unit=‰ñ :1000revŠÔ‚ÌÛ°Ó°ÄŞ‰ñ” */
+static u1 u1s_emfng_ecjmfneemh; /* lsb=1,unit=‰ñ :1000revŠÔ‚ÌÊ²Ó°ÄŞ‰ñ” */
+#endif
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+static u2 u2s_emfng_ecjmfdi;    /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev :DI¸‰ÎŒŸo‹–‰Â¶³İÀ */
+static u2 u2s_emfng_ecjmfpfi;   /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev :PFI¸‰ÎŒŸo‹–‰Â¶³İÀ */
+static u1 u1s_emfng_ecdmfdi[u1g_EJCC_NCYL];      /* lsb=1,unit=‰ñ :‹C“›•ÊDI¸‰Î¶³İÀ */
+static u1 u1s_emfng_ecdmfpfi[u1g_EJCC_NCYL];     /* lsb=1,unit=‰ñ :‹C“›•ÊPFI¸‰Î¶³İÀ */
+static u1 u1s_emfng_exdmfdim[u1g_EJCC_NCYL];     /* lsb=1 :‹C“›•ÊDIˆÙí¬—§Ì×¸Ş */
+static u1 u1s_emfng_exdmfpfim[u1g_EJCC_NCYL];    /* lsb=1 :‹C“›•ÊPFIˆÙí¬—§Ì×¸Ş */
+#endif
+static u1 u1s_emfng_ekldmfw1_mcr; /* lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î‰ñ””»’è‰ºŒÀ’l(ŒvZ’l) */
+#if JENCYL == u1g_EJCC_6CYL       /*y6‹C“›z*/
+static u1 u1s_emfng_ekldmfw2_mcr; /* lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î‰ñ””»’èãŒÀ’l(ŒvZ’l) */
+#endif
+static u2 u2s_emfng_eldmfst1_mcr; /* lsb=1,unit=‰ñ :º°ÙÄŞ½À°ÄEMˆ«‰»ÚÍŞÙ¸‰Î‰ñ””»’è’l(ŒvZ’l) */
+static u2 u2s_emfng_eldmfst2_mcr; /* lsb=1,unit=‰ñ :Î¯Ä½À°ÄEMˆ«‰»ÚÍŞÙ¸‰Î‰ñ””»’è’l(ŒvZ’l) */
+static u2 u2s_emfng_emfk_mcr;     /* lsb=1,unit=‰ñ :DTCo—Í‹C“›”»’è’l(ŒvZ’l) */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+static u2 u2s_emfng_ecmfnl_mcr;   /* lsb=1,unit=‰ñ :¸‰Î‰ñ”¬•p“x‚Ì”»’è’l(ŒvZ’l) */
+static u2 u2s_emfng_ecmfnm_mcr;   /* lsb=1,unit=‰ñ :¸‰Î‰ñ”’†•p“x‚Ì”»’è’l(ŒvZ’l) */
+static u2 u2s_emfng_ecmfnh_mcr;   /* lsb=1,unit=‰ñ :¸‰Î‰ñ”‘å•p“x‚Ì”»’è’l(ŒvZ’l) */
+#endif
+
+static stflag8 sts_emfng_flagi1;   /* ƒNƒ‰ƒ“ƒNŠp“¯Šú’†(ne30m)ƒ^ƒCƒ~ƒ“ƒO‘€ìƒtƒ‰ƒO */
+#define bis_emfng_exjmf          (sts_emfng_flagi1.b0)  /* :¸‰Î‚Ì‰¼”»’èÌ×¸Ş(TDC) */
+#define bis_emfng_exjtmf         (sts_emfng_flagi1.b1)  /* :¸‰Î‚Ì‰¼”»’è‹Ö~Ì×¸Ş(TDC) */
+#define bis_emfng_exjtmf2        (sts_emfng_flagi1.b2)  /* :¸‰Î‚Ì–{”»’è‹–‰ÂÌ×¸Ş(TDC) */
+#define bis_emfng_exmfkpl        (sts_emfng_flagi1.b3)  /* :’á‰ñ“]ó‘ÔŒp‘±Ì×¸Ş(TDC) */
+#define bis_emfng_exmfkpm        (sts_emfng_flagi1.b4)  /* :’†‰ñ“]ó‘ÔŒp‘±Ì×¸Ş(TDC) */
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+#define bis_emfng_exjmfdi        (sts_emfng_flagi1.b5)  /* :ecjmfdi¶³İÄ±¯ÌßğŒ¬—§‹L‰¯Ì×¸Ş(TDC) */
+#define bis_emfng_exjmfpfi       (sts_emfng_flagi1.b6)  /* :ecjmfpfi¶³İÄ±¯ÌßğŒ¬—§‹L‰¯Ì×¸Ş(TDC) */
+#endif
+
+static stflag8 sts_emfng_flagi2;   /* 65msl,drvclchgƒ^ƒCƒ~ƒ“ƒO‘€ìƒtƒ‰ƒO */
+#define bis_emfng_exottd         (sts_emfng_flagi2.b0)  /* :G”}OTÚÍŞÙˆÙíŒŸo‰¼‹L‰¯Ì×¸Ş(65msl,drvclchg) */
+#define bis_emfng_excdmfwclr     (sts_emfng_flagi2.b1)  /* :ecdmfw[]¸Ø±—v‹Ì×¸Ş(65msl) */
+#define bis_emfng_excdmfaot      (sts_emfng_flagi2.b2)  /* :G”}OT¸‰Î¶³İÀ‚É‚æ‚éG”}OT”»’è¬—§Ì×¸Ş(65msl) */
+#define bis_emfng_excdmfem2clr   (sts_emfng_flagi2.b3)  /* :ecdmfem2[]¸Ø±—v‹Ì×¸Ş(65msl) */
+#define bis_emfng_excdmfae2clr   (sts_emfng_flagi2.b4)  /* :ecdmfae2¸Ø±—v‹Ì×¸Ş(65msl) */
+#define bis_emfng_excntmf        (sts_emfng_flagi2.b5)  /* :ÄØ¯ÌßŒp‘±Ì×¸Ş(65msl,drvclchg) */
+#define bis_emfng_exdmf1         (sts_emfng_flagi2.b6)  /* :G”}OTÚÍŞÙŒ»İˆÙí‹L‰¯Ì×¸Ş(65msl,drvclchg) */
+
+static stflag8 sts_emfng_flagi3;   /* 65mslƒ^ƒCƒ~ƒ“ƒO‘€ìƒtƒ‰ƒO */
+#define bis_emfng_exdmfot        (sts_emfng_flagi3.b0)  /* :G”}OTÚÍŞÙˆÙí”»’èÌ×¸Ş(65msl) */
+#define bis_emfng_exumfot        (sts_emfng_flagi3.b1)  /* :G”}OTÚÍŞÙ³í”»’è•Û—¯Ì×¸Ş(65msl) */
+#define bis_emfng_exhmfoton      (sts_emfng_flagi3.b2)  /* :G”}OT‚É‚æ‚éMIL“_–Å—v‹Ì×¸Ş(65msl) */
+#define bis_emfng_exhmfotoff     (sts_emfng_flagi3.b3)  /* :G”}OT‚É‚æ‚éMIL“_–Å·¬İ¾Ù—v‹Ì×¸Ş(65msl) */
+#define bis_emfng_exdmfem        (sts_emfng_flagi3.b4)  /* :EMˆ«‰»ÚÍŞÙˆÙíŒŸoÌ×¸Ş(65msl) */
+#define bis_emfng_exumfem        (sts_emfng_flagi3.b5)  /* :EMˆ«‰»ÚÍŞÙ³í”»’è•Û—¯Ì×¸Ş(65msl) */
+
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+static stflag8 sts_emfng_flagi4;   /* 65mslƒ^ƒCƒ~ƒ“ƒO‘€ìƒtƒ‰ƒO */
+#define bis_emfng_exdmfdi        (sts_emfng_flagi4.b0)  /* :DIˆÙíÌ×¸Ş(65msl) */
+#define bis_emfng_exumfdi        (sts_emfng_flagi4.b1)  /* :DIˆÙí‚É‚æ‚é³í”»’è•Û—¯Ì×¸Ş(65msl) */
+#define bis_emfng_exdmfpfi       (sts_emfng_flagi4.b2)  /* :PFIˆÙíÌ×¸Ş(65msl) */
+#define bis_emfng_exumfpfi       (sts_emfng_flagi4.b3)  /* :PFIˆÙí‚É‚æ‚é³í”»’è•Û—¯Ì×¸Ş(65msl) */
+#define bis_emfng_excdmfdiclr    (sts_emfng_flagi4.b4)  /* :exdmfdim[]¸Ø±—pÌ×¸Ş(65msl) */
+#define bis_emfng_excdmfpficlr   (sts_emfng_flagi4.b5)  /* :exdmfpfim[]¸Ø±—pÌ×¸Ş(65msl) */
+#endif
+
+#if JETCORE_D == u1g_EJCC_USE                           /*yt-CORE‘Î‰—Lz*/
+static stflag8 sts_emfng_flagi5;   /* 65mslƒ^ƒCƒ~ƒ“ƒO‘€ìƒtƒ‰ƒO */
+#define bis_emfng_exoutftp       (sts_emfng_flagi5.b0)  /* :OT¸‰Îƒ‚[ƒh—ÌˆæŠO”»’èÌ×¸Ş(65msl) */
+#define bis_emfng_exemfst        (sts_emfng_flagi5.b1)  /* :EMˆ«‰»ƒŒƒxƒ‹‰‰ñ1000rev”»’èÌ×¸Ş(65msl) */
+#endif
+
+static s2 s2s_emfng_ecdmfaotb;  /* lsb=1,unit=‰ñ :ecdmfaot-ecdtmf2‚Ìƒ‰ƒbƒ`(MODE06—p) */
+static s4 s4s_emfng_emfrtotsum; /* lsb=256/128/256,unit=% :ÏZ¸‰Î”»’è’l */
+static u2 u2s_emfng_ecmfotcnt;  /* lsb=1,unit=‰ñ :•½‹ÏZo—pÏZ‰ñ” */
+#if JEMFDTC_D == u1g_EJCC_USE  /*y¸‰ÎOBD DTC—Lz*/
+static u1 u1s_emfng_xem_lstpnd_Lch;     /* lsb=1 :‘OÄŞ×²ËŞİ¸Ş»²¸Ù‰¼ˆÙíó‘Ô(EM)(‘¼•”•i×¯Á—p) */
+static u1 u1s_emfng_xot_lstpnd_Lch;     /* lsb=1 :‘OÄŞ×²ËŞİ¸Ş»²¸Ù‰¼ˆÙíó‘Ô(OT)(‘¼•”•i×¯Á—p) */
+static u1 u1s_emfng_xot_warning_Lch;    /* lsb=1 :OT¸‰ÎMILó‘Ô(‘¼•”•i×¯Á—p) */
+static u1 u1s_emfng_xem_warning_Lch;    /* lsb=1 :EM¸‰ÎMILó‘Ô(‘¼•”•i×¯Á—p) */
+#endif
+static u1 u1s_emfng_xreqclr_Lch;        /* lsb=1 :ÀŞ²±¸Şî•ñ¸Ø±—v‹Ì×¸Ş(‘¼•”•i×¯Á—p) */
+static u1 u1s_emfng_state_Lch;          /* lsb=1 :ŒŸoŠ´“xó‘Ô(‘¼•”•i×¯Á—p) */
+#if ( JEMFDTC_D == u1g_EJCC_USE ) && ( JETCORE_D == u1g_EJCC_USE ) && ( JEOBDUDS_D == u1g_EJCC_USE )    /*y¸‰ÎOBD DTC—LzANDyt-CORE‘Î‰—LzANDyOBDonUDS‘Î‰—Lz*/
+static u1 u1s_emfng_pas;                /* EMˆ«‰»ÚÍŞÙ”»’èÀ²Ğİ¸Ş¬—§Ì×¸Ş(65msl) */
+#endif
+
+/*-------------------------------------------------------------------*/
+/* const data’è‹`                                                    */
+/*-------------------------------------------------------------------*/
+#pragma ghs startdata
+/* ƒoƒbƒNƒAƒbƒvRAM-ID */
+static volatile const u2 u2s_ECDMFEMTV_U2_ID[u1g_EJCC_NCYL] =  /* :ƒoƒbƒNƒAƒbƒvRAM-ID */
+{
+     u2g_EMFNG_ECDMFEMTV1_U2_ID
+    ,u2g_EMFNG_ECDMFEMTV2_U2_ID
+    ,u2g_EMFNG_ECDMFEMTV3_U2_ID
+    ,u2g_EMFNG_ECDMFEMTV4_U2_ID
+#if JENCYL == u1g_EJCC_6CYL          /*y6‹C“›z*/
+    ,u2g_EMFNG_ECDMFEMTV5_U2_ID
+    ,u2g_EMFNG_ECDMFEMTV6_U2_ID
+#endif
+};
+static volatile const u2 u2s_ECDMFEMMNTL_U2_ID[u1g_EJCC_NCYL] =  /* :ƒoƒbƒNƒAƒbƒvRAM-ID */
+{
+     u2g_EMFNG_ECDMFEMMNTL1_U2_ID
+    ,u2g_EMFNG_ECDMFEMMNTL2_U2_ID
+    ,u2g_EMFNG_ECDMFEMMNTL3_U2_ID
+    ,u2g_EMFNG_ECDMFEMMNTL4_U2_ID
+#if JENCYL == u1g_EJCC_6CYL          /*y6‹C“›z*/
+    ,u2g_EMFNG_ECDMFEMMNTL5_U2_ID
+    ,u2g_EMFNG_ECDMFEMMNTL6_U2_ID
+#endif
+};
+static volatile const u2 u2s_ECDMFEMMXTL_U2_ID[u1g_EJCC_NCYL] =  /* :ƒoƒbƒNƒAƒbƒvRAM-ID */
+{
+     u2g_EMFNG_ECDMFEMMXTL1_U2_ID
+    ,u2g_EMFNG_ECDMFEMMXTL2_U2_ID
+    ,u2g_EMFNG_ECDMFEMMXTL3_U2_ID
+    ,u2g_EMFNG_ECDMFEMMXTL4_U2_ID
+#if JENCYL == u1g_EJCC_6CYL          /*y6‹C“›z*/
+    ,u2g_EMFNG_ECDMFEMMXTL5_U2_ID
+    ,u2g_EMFNG_ECDMFEMMXTL6_U2_ID
+#endif
+};
+static volatile const u2 u2s_ECDMFAVTV_U2_ID[u1g_EJCC_NCYL] =  /* :ƒoƒbƒNƒAƒbƒvRAM-ID */
+{
+     u2g_EMFNG_ECDMFAVTV1_U2_ID
+    ,u2g_EMFNG_ECDMFAVTV2_U2_ID
+    ,u2g_EMFNG_ECDMFAVTV3_U2_ID
+    ,u2g_EMFNG_ECDMFAVTV4_U2_ID
+#if JENCYL == u1g_EJCC_6CYL          /*y6‹C“›z*/
+    ,u2g_EMFNG_ECDMFAVTV5_U2_ID
+    ,u2g_EMFNG_ECDMFAVTV6_U2_ID
+#endif
+};
+static volatile const u2 u2s_ECDMFAVMNTL_U2_ID[u1g_EJCC_NCYL] =  /* :ƒoƒbƒNƒAƒbƒvRAM-ID */
+{
+     u2g_EMFNG_ECDMFAVMNTL1_U2_ID
+    ,u2g_EMFNG_ECDMFAVMNTL2_U2_ID
+    ,u2g_EMFNG_ECDMFAVMNTL3_U2_ID
+    ,u2g_EMFNG_ECDMFAVMNTL4_U2_ID
+#if JENCYL == u1g_EJCC_6CYL          /*y6‹C“›z*/
+    ,u2g_EMFNG_ECDMFAVMNTL5_U2_ID
+    ,u2g_EMFNG_ECDMFAVMNTL6_U2_ID
+#endif
+};
+static volatile const u2 u2s_ECDMFAVMXTL_U2_ID[u1g_EJCC_NCYL] =  /* :ƒoƒbƒNƒAƒbƒvRAM-ID */
+{
+     u2g_EMFNG_ECDMFAVMXTL1_U2_ID
+    ,u2g_EMFNG_ECDMFAVMXTL2_U2_ID
+    ,u2g_EMFNG_ECDMFAVMXTL3_U2_ID
+    ,u2g_EMFNG_ECDMFAVMXTL4_U2_ID
+#if JENCYL == u1g_EJCC_6CYL          /*y6‹C“›z*/
+    ,u2g_EMFNG_ECDMFAVMXTL5_U2_ID
+    ,u2g_EMFNG_ECDMFAVMXTL6_U2_ID
+#endif
+};
+
+#if JEOOBD == u1g_EJCC_USE           /*ysê’²¸—Lz*/
+static volatile const u2 u2s_EOCDMFEM2MX_U1_ID[u1g_EJCC_NCYL] =  /* :ƒoƒbƒNƒAƒbƒvRAM-ID */
+{
+     u2g_EMFNG_EOCDMFEM2MX1_U1_ID
+    ,u2g_EMFNG_EOCDMFEM2MX2_U1_ID
+    ,u2g_EMFNG_EOCDMFEM2MX3_U1_ID
+    ,u2g_EMFNG_EOCDMFEM2MX4_U1_ID
+ #if JENCYL == u1g_EJCC_6CYL         /*y6‹C“›z*/
+    ,u2g_EMFNG_EOCDMFEM2MX5_U1_ID
+    ,u2g_EMFNG_EOCDMFEM2MX6_U1_ID
+ #endif
+};
+#endif
+
+#if ( JETCORE_D == u1g_EJCC_USE ) && ( JEOBDUDS_D == u1g_EJCC_NOT_USE )  /*yt-CORE‘Î‰—LzANDyOBDonUDS‘Î‰–³z*/
+static volatile const u2 u2s_emfng_ecdmfav_tbl[u1g_EJCC_NCYL] =
+{
+     u2g_WTCIF_DEM_DTR_ECDMFAV1
+    ,u2g_WTCIF_DEM_DTR_ECDMFAV2
+    ,u2g_WTCIF_DEM_DTR_ECDMFAV3
+    ,u2g_WTCIF_DEM_DTR_ECDMFAV4
+ #if JENCYL == u1g_EJCC_6CYL         /*y6‹C“›z*/
+    ,u2g_WTCIF_DEM_DTR_ECDMFAV5
+    ,u2g_WTCIF_DEM_DTR_ECDMFAV6
+ #endif
+};
+static volatile const u2 u2s_emfng_ecdmfem_tbl[u1g_EJCC_NCYL] =
+{
+     u2g_WTCIF_DEM_DTR_ECDMFEM1
+    ,u2g_WTCIF_DEM_DTR_ECDMFEM2
+    ,u2g_WTCIF_DEM_DTR_ECDMFEM3
+    ,u2g_WTCIF_DEM_DTR_ECDMFEM4
+ #if JENCYL == u1g_EJCC_6CYL         /*y6‹C“›z*/
+    ,u2g_WTCIF_DEM_DTR_ECDMFEM5
+    ,u2g_WTCIF_DEM_DTR_ECDMFEM6
+ #endif
+};
+#endif
+#pragma ghs enddata
+
+/*-------------------------------------------------------------------*/
+/* ŠÖ”‚ÌprototypeéŒ¾                                               */
+/*-------------------------------------------------------------------*/
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+static void emfng_eocmfmlt_pt( const u1 ptt_ecdmfw[] ); /* :sê’²¸RAMXVˆ— */
+static void emfng_eocmfn_u2( u2 u2t_cdmfae );     /* :sê’²¸RAMXVˆ— */
+#endif
+static u1 u1s_emfng_wxreqclr( void );             /* :sê’²¸RAMÁ‹ˆ— */
+static void emfng_mcr_cal( void );                /* :ŒvZ’l•Ï”‚ÌZo */
+static void emfng_xottd_cal( void );              /* :G”}OTÚÍŞÙˆÙíŒŸo‰¼‹L‰¯Ì×¸Ş‚Ì‘€ì */
+static void emfng_cdmfi_reset( void );            /* :¸‰Î‰ñ””»’è¶³İÀ(±²ÄŞÙ—p)‚Ì¸Ø±ˆ— */
+static void emfng_mf_cnt_u1u1( u1 u1t_mfkind, u1 u1t_mfcyl );             /* :¸‰ÎƒJƒEƒ“ƒ^‚ÌZo */
+static void emfng_ot_detect_ptptptpt( u1 *ptt_xumfot, u1 *ptt_xdmfot, u1 *ptt_xhmfoton, u1 *ptt_xhmfotoff );  /* :G”}OTÚÍŞÙˆÙí”»’è */
+static void emfng_em_detect_u2ptpt( u2 u2t_cdmfae2, u1 *ptt_xdmfem, u1 *ptt_xumfem );  /* :EMˆ«‰»ƒŒƒxƒ‹ˆÙí”»’è */
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+static void emfng_di_detect_ptpt( u1 *ptt_xdmfdi, u1 *ptt_xumfdi );     /* :DIˆÙíŒŸo */
+static void emfng_pfi_detect_ptpt( u1 *ptt_xdmfpfi, u1 *ptt_xumfpfi );  /* :PFIˆÙíŒŸo */
+#endif
+#if JEMFDTC_D == u1g_EJCC_USE    /*y¸‰ÎOBD DTC—Lz*/
+static void emfng_wxmf_out( void );               /* :“d‹Z‚Ö‚Ì’Ê’mˆ— */
+#endif
+static void emfng_emode06_cal( void );            /* :mode$06‘Î‰¸‰Î¶³İÀ‚Ì‘€ì */
+static u1 u1s_emfng_exrcdmf( void );              /* :EWMA¸‰Î¶³İÀŒvZ—š—ğÌ×¸Şæ“¾ˆ— */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+static void emfng_espdaemclr( void );             /* :sê’²¸RAM¸Ø±ˆ— */
+#endif
+static void emfng_roughjdg_u1u1( u1 u1t_xmfne, u1 u1t_mfkind );  /* ˆ«˜H”»’èŠÖ˜Aˆ— */
+
+/*-------------------------------------------------------------------*/
+/* ŠÖ”                                                              */
+/*-------------------------------------------------------------------*/
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_pwon( )                                    */
+/*  ˆ—“à—e      | ‰Šú‰»ˆ—                                       */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| emfcnt_pwon()‚æ‚èƒR[ƒ‹                          */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      |                                                  */
+/*********************************************************************/
+void
+emfng_pwon( void )
+{
+    /********************/
+    /* ŒvZ’l•Ï”‚ÌZo */
+    /********************/
+    emfng_mcr_cal();
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_mfptn_ann_u1u1u1( )                        */
+/*  ˆ—“à—e      | ŒŸo‹–‰Â¶³İÀ‚Ì‘€ì                               */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| TDC–ˆ(emfcnt_tdcm()‚æ‚èƒR[ƒ‹)                   */
+/*  ˆø”          | u1t_mfkind     :lsb=1 ¸‰Îí•Ê                   */
+/*                | u1t_mfcyl      :lsb=1 ¸‰Î‹C“›                   */
+/*                | u1t_xmfne      :lsb=1 ¸‰Î–{”»’è                 */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      | ‘O’ñğŒ¬—§‚ÉÀ{(emfcnt)                     */
+/*********************************************************************/
+void
+emfng_mfptn_ann_u1u1u1( u1 u1t_mfkind, u1 u1t_mfcyl, u1 u1t_xmfne )
+{
+    s4 s4t_ecjmfot;         /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev :G”}OTÚÍŞÙ¸‰ÎŒŸo‹–‰Â¶³İÀ */
+    s4 s4t_ecjmfoti;        /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev :G”}OTÚÍŞÙ±²ÄŞÙ¸‰ÎŒŸo‹–‰Â¶³İÀ */
+    s4 s4t_ecjmfem;         /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev :EMˆ«‰»ÚÍŞÙ¸‰ÎŒŸo‹–‰Â¶³İÀ */
+    s4 s4t_ene;             /* lsb=12800/64/256,unit=rpm :´İ¼Şİ‰ñ“]” */
+    s4 s4t_ejmfne;          /* lsb=1 :‰ñ“]—Ìˆæ”»’è’l */
+    s4 s4t_emfrtot;         /* lsb=256/128/256,unit=% :ÏZ¸‰Î”»’è’l•â³ŒW” */
+    s4 s4t_emfrtotsum;      /* lsb=256/128/256,unit=% :ÏZ¸‰Î”»’è’l */
+    u2 u2t_ecmfotcnt;       /* lsb=1,unit=‰ñ :•½‹ÏZo—pÏZ‰ñ” */
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+    s2 s2t_ekpfi;           /* lsb=(1*4)/128/256,unit=”{ :Îß°Ä•¬Ë—ÊZoŒW” */
+    u2 u2t_ecjmfdi;         /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev :DI¸‰ÎŒŸo‹–‰Â¶³İÀ */
+    u2 u2t_ecjmfpfi;        /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev :PFI¸‰ÎŒŸo‹–‰Â¶³İÀ */
+#endif
+    s2 s2t_MFNEL3_c;        /* lsb=12800/64/256,unit=rpm :ƒAƒCƒhƒ‹—Ìˆæ”»’è’l */
+    s2 s2t_eklsm;           /* lsb=320/64/256,unit=% :‹ó‹C—Ê•‰‰×—¦iâ‘Î¿—Êj */
+
+    /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+    s4t_ene      = (s4)s2g_ene_ene;
+    s4t_ejmfne   = (s4)u1g_emfne_ejmfne;
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+    s2t_ekpfi    = s2g_eminj_ekpfi;
+#endif
+    s2t_MFNEL3_c = s2s_emfng_MFNEL3;
+    s2t_eklsm = s2g_eklset_eklsm;
+
+    /***************************************/
+    /* G”}OTÚÍŞÙ¸‰ÎŒŸo‹–‰Â¶³İÀ‚Ì²İ¸ØÒİÄ */
+    /***************************************/
+    s4t_ecjmfot = (s4)u2g_emfng_ecjmfot;
+    if ( s4t_ecjmfot < (s4)u2g_U2MAX )
+    {
+        s4t_ecjmfot++;
+    }
+    /* RAMƒf[ƒ^‚ÉŠi”[ */
+    u2g_emfng_ecjmfot = (u2)s4t_ecjmfot;              /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev */
+
+    /**********************************************/
+    /* G”}OTÚÍŞÙ±²ÄŞÙ¸‰ÎŒŸo‹–‰Â¶³İÀ‚Ì²İ¸ØÒİÄ */
+    /**********************************************/
+    s4t_ecjmfoti = (s4)u2g_emfng_ecjmfoti;
+    if ( ( ( s4t_ejmfne == (s4)u1g_EMFNE_REV_IDLE2 )
+#if JEMFHOUKI == u1g_EJCC_USAMF                                /*y‘Î•Ä–@‹Kz*/
+        || ( s4t_ejmfne == (s4)u1g_EMFNE_REV_IDLE1 )
+#endif
+         )
+      && ( s4t_ene < (s4)s2t_MFNEL3_c ) )
+    {
+        if ( s4t_ecjmfoti < (s4)u2g_U2MAX )
+        {
+            s4t_ecjmfoti++;
+        }
+    }
+    /* RAMƒf[ƒ^‚ÉŠi”[ */
+    u2g_emfng_ecjmfoti = (u2)s4t_ecjmfoti;             /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev */
+
+    /***************************************/
+    /* EMˆ«‰»ÚÍŞÙ¸‰ÎŒŸo‹–‰Â¶³İÀ‚Ì²İ¸ØÒİÄ */
+    /***************************************/
+    s4t_ecjmfem = (s4)u2g_emfng_ecjmfem;
+    if ( s4t_ecjmfem < (s4)u2g_U2MAX )
+    {
+        s4t_ecjmfem++;
+    }
+    /* RAMƒf[ƒ^‚ÉŠi”[ */
+    u2g_emfng_ecjmfem = (u2)s4t_ecjmfem;               /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev */
+
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+    /*******************************/
+    /* DI¸‰ÎŒŸo‹–‰Â¶³İÀ‚Ì²İ¸ØÒİÄ */
+    /*******************************/
+    u2t_ecjmfdi = u2s_emfng_ecjmfdi;
+    if ( s2t_ekpfi <= s2g_emfok_NGDI )
+    {
+        if ( u2t_ecjmfdi < u2g_U2MAX )
+        {
+            u2t_ecjmfdi++;
+        }
+        bis_emfng_exjmfdi = (u1)ON;  /* ecjmfdi¶³İÄ±¯ÌßğŒ¬—§‹L‰¯Ì×¸Ş */
+    }
+    else    /* ecjmfdi¶³İÄ±¯ÌßğŒ•s¬—§ */
+    {
+        bis_emfng_exjmfdi = (u1)OFF;
+    }
+    /* RAMƒf[ƒ^‚ÉŠi”[ */
+    u2s_emfng_ecjmfdi = u2t_ecjmfdi;         /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev */
+
+    /********************************/
+    /* PFI¸‰ÎŒŸo‹–‰Â¶³İÀ‚Ì²İ¸ØÒİÄ */
+    /********************************/
+    u2t_ecjmfpfi = u2s_emfng_ecjmfpfi;
+    if ( s2t_ekpfi >= s2g_emfok_NGPFI )
+    {
+        if ( u2t_ecjmfpfi < u2g_U2MAX )
+        {
+            u2t_ecjmfpfi++;
+        }
+        bis_emfng_exjmfpfi = (u1)ON;  /* ecjmfpfi¶³İÄ±¯ÌßğŒ¬—§‹L‰¯Ì×¸Ş */
+    }
+    else    /* ecjmfpfi¶³İÄ±¯ÌßğŒ•s¬—§ */
+    {
+        bis_emfng_exjmfpfi = (u1)OFF;
+    }
+    /* RAMƒf[ƒ^‚ÉŠi”[ */
+    u2s_emfng_ecjmfpfi = u2t_ecjmfpfi;       /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev */
+#endif
+
+    /**********************/
+    /* ¸‰Î‰ñ”‚ÌÏZˆ— */
+    /**********************/
+    if ( u1t_mfkind != u1g_EMFCNT_NOT )
+    {
+        emfng_mf_cnt_u1u1( u1t_mfkind, u1t_mfcyl );
+    }
+
+    /********************/
+    /* ˆ«˜H”»’èŠÖ˜Aˆ— */
+    /********************/
+    emfng_roughjdg_u1u1( u1t_xmfne, u1t_mfkind );
+
+    /*******************************************/
+    /* ÏZ¸‰Î”»’è’l,•½‹ÏZo—pÏZ‰ñ”‚ÌZo */
+    /*******************************************/
+    s4t_emfrtotsum = s4s_emfng_emfrtotsum;
+    u2t_ecmfotcnt = u2s_emfng_ecmfotcnt;
+
+    s4t_emfrtot = (s4)s2g_glmap2h_s2s2pt( s2t_eklsm, (s2)s4t_ene, &s2g_emfng_emfrtot_map[0] );
+                                                    /* lsb=256/128/256,unit=% */
+#if JENGPF_E != u1g_EJCC_NOT_USE       /*yGPF—Lz*/
+    if ( ( u1g_egpfrgcnd_exgpfrgsrv == (u1)ON )
+      || ( u1g_egpfhtum_exdth == (u1)ON )
+      || ( u1g_egpfhtum_exeff == (u1)ON )
+ #if JERLOK == u1g_EJCC_USE            /*yØ¯ÁØ°İ‰^“]‰Âz*/
+      || ( u1g_egpfrgum_exrgact == (u1)ON )
+ #endif
+       )
+    {
+        s4t_emfrtot = (s4)s2g_glmap2h_s2s2pt( s2t_eklsm, (s2)s4t_ene, &s2g_emfng_emfrtotgpf_map[0] );
+                                                    /* lsb=256/128/256,unit=% */
+    }
+#endif
+    s4t_emfrtotsum = s4g_gladdst_s4s4( s4t_emfrtotsum, s4t_emfrtot );
+
+    if ( u2t_ecmfotcnt < u2g_U2MAX )
+    {
+        u2t_ecmfotcnt++;
+    }
+
+    /* RAMƒf[ƒ^‚ÉŠi”[ */
+    s4s_emfng_emfrtotsum = s4t_emfrtotsum;
+    u2s_emfng_ecmfotcnt = u2t_ecmfotcnt;
+}
+
+#if JENCYL == u1g_EJCC_6CYL     /*y6‹C“›z*/
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_mfmlt_ann_u1u1( )                          */
+/*  ˆ—“à—e      | ‘ÎŒü‹C“›¸‰Î”»’èŒ‹‰Ê’Ê’mˆ—                     */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ATDC30CAƒ^ƒCƒ~ƒ“ƒO                               */
+/*                | (emfcnt_neg_mlt()‚æ‚èƒR[ƒ‹)                     */
+/*  ˆø”          | u1t_mfkind     :lsb=1 ¸‰Îí•Ê                   */
+/*                | u1t_mfcyl      :lsb=1 ¸‰Î‹C“›                   */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      | ‘O’ñğŒ¬—§‚ÉÀ{(emfcnt)                     */
+/*                |y6‹C“›z                                         */
+/*********************************************************************/
+void
+emfng_mfmlt_ann_u1u1( u1 u1t_mfkind, u1 u1t_mfcyl )
+{
+    if ( u1t_mfkind == u1g_EMFCNT_OPPS )
+    {
+        emfng_mf_cnt_u1u1( u1t_mfkind, u1t_mfcyl );         /* ¸‰Î‰ñ”‚ÌÏZˆ— */
+ #if JEEFI == u1g_EJCC_DUAL      /*yÃŞ­±ÙINJz*/
+        emfok_mfneld_set();                                 /* ‘ÎŒü‹C“›¸‰Î”»’è‚Ìˆ— */
+        emfok_mfareacnt_ann_u1u1( u1t_mfkind, u1t_mfcyl );  /* —Ìˆæ“à¸‰Î‰ñ”‚ÌÏZ */
+ #endif
+    }
+}
+#endif
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_tdcm( )                                    */
+/*  ˆ—“à—e      | TDCÀ²Ğİ¸Şˆ—                                    */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| TDC–ˆ(emfcnt_tdcm()‚æ‚èƒR[ƒ‹)                   */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      |                                                  */
+/*********************************************************************/
+void
+emfng_tdcm( void )
+{
+    u2 u2t_ekldmfae;       /* lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ¸‰Î”»’è’l */
+    s2 s2t_ene;            /* lsb=12800/64/256,unit=rpm :´İ¼Şİ‰ñ“]” */
+    u1 u1t_state;          /* lsb=1 :ŒŸoŠ´“xó‘Ô */
+    u1 u1t_exmfkpl;        /* lsb=1 :’á‰ñ“]ó‘ÔŒp‘±Ì×¸Ş */
+    u1 u1t_exmfkpm;        /* lsb=1 :’†‰ñ“]ó‘ÔŒp‘±Ì×¸Ş */
+
+    u1t_state = u1g_wsentivchg_state;
+
+    /************************/
+    /* EMˆ«‰»ÚÍŞÙ¸‰Î”»’è’l */
+    /************************/
+    if ( u2g_emfng_ecjmfem == (u2)0U )
+    {
+        u2t_ekldmfae = u2g_emfng_eldmfaem_mcr;          /* lsb=1,unit=‰ñ */
+        if ( ( u1s_emfng_ecjemrev < u1s_emfng_CJEMREV )
+          && ( u1t_state != u1g_WSENTIVCHG_LVL2 ) )
+        {
+            /*****************/
+            /*   Î¯Ä½À°Ä   */
+            /*****************/
+            if ( big_emfng_exhstmf == (u1)ON )                  /* Î¯Ä½À°Ä */
+            {
+                u2t_ekldmfae = u2s_emfng_eldmfst2_mcr;  /* lsb=1,unit=‰ñ */
+            }
+
+            /*******************/
+            /*   º°ÙÄŞ½À°Ä   */
+            /*******************/
+            if ( big_emfng_excstmf == (u1)ON )                  /* º°ÙÄŞ½À°Ä */
+            {
+                u2t_ekldmfae = u2s_emfng_eldmfst1_mcr;  /* lsb=1,unit=‰ñ */
+            }
+        }
+        if ( u1t_state == u1g_WSENTIVCHG_IUE )
+        {
+            u2t_ekldmfae = u2g_glmulst_u2u2u2( u2t_ekldmfae, u2s_emfng_KLEVEL3, (u2)6U );  /* lsb=1*(4/256) ¨ 1 */
+        }
+        /* RAMƒf[ƒ^‚ÉŠi”[ */
+        u2g_emfng_ekldmfae = u2t_ekldmfae;          /* lsb=1,unit=‰ñ */
+    }
+
+    /********************/
+    /* NEŒp‘±Ì×¸Ş‚Ì‘€ì */
+    /********************/
+    if ( u2g_emfng_ecjmfot == (u2)0U )
+    {
+        /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+        s2t_ene = s2g_ene_ene;
+
+        /* ’á‰ñ“]ó‘ÔŒp‘±Ì×¸Ş(XMFKPL)‚Ì‘€ì */
+        u1t_exmfkpl = (u1)OFF;
+        if ( s2t_ene <= (s2)(((2000.)/(12800./64./256.))+0.5) )
+        {
+            u1t_exmfkpl = (u1)ON;
+        }
+        glbitcp_bibi( u1t_exmfkpl, bis_emfng_exmfkpl );
+
+        /* ’†‰ñ“]ó‘ÔŒp‘±Ì×¸Ş(XMFKPM)‚Ì‘€ì */
+        u1t_exmfkpm = (u1)OFF;
+        if ( s2t_ene <= (s2)(((3000.)/(12800./64./256.))+0.5) )
+        {
+            u1t_exmfkpm = (u1)ON;
+        }
+        glbitcp_bibi( u1t_exmfkpm, bis_emfng_exmfkpm );
+    }
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_xjmf_ann_u1( )                             */
+/*  ˆ—“à—e      | ¸‰Î‰¼”»’èŒ‹‰Ê’Ê’mˆ—                           */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| TDC–ˆ(emfcnt_tdcm()‚æ‚èƒR[ƒ‹)                   */
+/*  ˆø”          | u1t_xjmf :lsb=1 ‰¼”»’èŒ‹‰Ê                       */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      | ‰¼”»’èŒã‚ÉÀ{                                   */
+/*********************************************************************/
+void
+emfng_xjmf_ann_u1( u1 u1t_xjmf )
+{
+    /* RAMƒf[ƒ^‚ÉŠi”[ */
+    glbitcp_bibi( u1t_xjmf, bis_emfng_exjmf );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_cjpmf_inc_u1( )                            */
+/*  ˆ—“à—e      | ¾ŞÛ¸Û½¶³İÀ‚Ì‘€ì                                 */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| BTDC60CA(emfccrnk‚æ‚èƒR[ƒ‹)y4‹C“›z            */
+/*                | BTDC30CA(emfccrnk‚æ‚èƒR[ƒ‹)y6‹C“›z            */
+/*                | ATDC30CA(emfccrnk‚æ‚èƒR[ƒ‹)                     */
+/*  ˆø”          | u1t_timming :lsb=1 ecjpmf¶³İÄ±¯ÌßÀ²Ğİ¸Ş          */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      | DLTMFL,DDTCR1ZoŒã‚ÉÀ{                        */
+/*********************************************************************/
+void
+emfng_cjpmf_inc_u1( u1 u1t_timming )
+{
+    u1 u1t_ecjpmf;      /* lsb=1,unit=‰ñ :¾ŞÛ¸Û½¶³İÀ */
+    u1 u1t_ejmfne;      /* lsb=1 :‰ñ“]—Ìˆæ */
+    u1 u1t_timjdg;      /* lsb=1 :ƒ[ƒN•Ï” */
+    u1 u1t_exjtmf;      /* lsb=1 :¸‰Î‚Ì‰¼”»’è‹Ö~Ì×¸Ş */
+
+    /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+    u1t_ecjpmf = u1s_emfng_ecjpmf;
+    u1t_ejmfne = u1g_emfne_ejmfne;
+    u1t_exjtmf = (u1)bis_emfng_exjtmf;
+
+    u1t_timjdg = (u1)OFF;
+    if ( ( u1t_timming == u1g_EMFCCRNK_DLTMFL_TIMMING )
+      && ( u1t_ejmfne  != u1g_EMFNE_REV_HIGH )
+#if JEMFMETHOD_D == u1g_EJCC_TIME_D    /*y¸‰Îƒ¢T–@z*/
+      && ( s2g_emfccrnk_edltmflxh[0] >= (s2)0 )
+      && ( s2g_emfccrnk_edltmflxh[1] <  (s2)0 )
+#endif
+#if JEMFMETHOD_D == u1g_EJCC_OMEGA_D   /*y¸‰Îƒ¢ƒÖ–@z*/
+      && ( s2g_emfccrnk_ewmfl[0] <= (s2)0 )
+      && ( s2g_emfccrnk_ewmfl[1] >  (s2)0 )
+#endif
+       )
+    {
+        u1t_timjdg = (u1)ON;
+    }
+    if ( ( u1t_timming == u1g_EMFCCRNK_DDTCRX_TIMMING )
+      && ( u1t_ejmfne  == u1g_EMFNE_REV_HIGH )
+#if JEMFMETHOD_D == u1g_EJCC_TIME_D    /*y¸‰Îƒ¢T–@z*/
+      && ( s2g_emfccrnk_eddtcrxh[0] >= (s2)0 )
+      && ( s2g_emfccrnk_eddtcrxh[1] <  (s2)0 )
+#endif
+#if JEMFMETHOD_D == u1g_EJCC_OMEGA_D   /*y¸‰Îƒ¢ƒÖ–@z*/
+ #if JENCYL == u1g_EJCC_6CYL    /*y6‹C“›z*/
+      && ( s2g_emfccrnk_ewmfh[0] <= (s2)0 )
+      && ( s2g_emfccrnk_ewmfh[1] >  (s2)0 )
+ #endif
+ #if JENCYL == u1g_EJCC_4CYL    /*y4‹C“›z*/
+      && ( s2g_emfccrnk_ewmfhp[0] <= (s2)0 )
+      && ( s2g_emfccrnk_ewmfhp[1] >  (s2)0 )
+ #endif
+#endif
+       )
+    {
+        u1t_timjdg = (u1)ON;
+    }
+    if ( ( u1t_timjdg == (u1)ON )
+      && ( bis_emfng_exjmf == (u1)OFF )
+      && ( u1t_exjtmf == (u1)ON ) )
+    {
+        if ( u1t_ecjpmf < u1g_U1MAX )
+        {
+            u1t_ecjpmf++;
+        }
+    }
+    if ( u1t_exjtmf == (u1)OFF )
+    {
+        u1t_ecjpmf = (u1)0U;
+    }
+
+    /* RAMƒf[ƒ^‚ÉŠi”[ */
+    u1s_emfng_ecjpmf = u1t_ecjpmf;      /* lsb=1,unit=‰ñ */
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_mf_cnt_u1u1( )                             */
+/*  ˆ—“à—e      | ¸‰ÎƒJƒEƒ“ƒ^‚ÌZo                               */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ¸‰Î”»’è¬—§                                   */
+/*                | TDC–ˆ(emfng_mfptn_ann()‚æ‚èƒR[ƒ‹)               */
+/*                | ATDC30CA(emfng_mfmlt_ann()‚æ‚èƒR[ƒ‹)y6‹C“›z   */
+/*  ˆø”          | u1t_mfkind     :lsb=1 ¸‰Îí•Ê                   */
+/*                | u1t_mfcyl      :lsb=1 ¸‰Î‹C“›                   */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      | “à•”ŠÖ”                                         */
+/*********************************************************************/
+static void
+emfng_mf_cnt_u1u1( u1 u1t_mfkind, u1 u1t_mfcyl )
+{
+    s4 s4t_i;               /* lsb=1 :forƒ‹[ƒv—p•Ï” */
+    u1 u1t_bit;             /* :¸‰Î‹C“›Ì×¸Ş */
+    s4 s4t_ecdmfaotbnk[2];  /* lsb=1,unit=‰ñ :ÊŞİ¸•ÊG”}OTÚÍŞÙ¸‰Î¶³İÀ */
+    s4 s4t_ecdmfaot;        /* lsb=1,unit=‰ñ :G”}OTÚÍŞÙ‘S‹C“›¸‰Î¶³İÀ */
+    s4 s4t_ecdmfaoti;       /* lsb=1,unit=‰ñ :±²ÄŞÙ’†‘S‹C“›¸‰Î¶³İÀ */
+    s4 s4t_ecdmfae2;        /* lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ‘S‹C“›¸‰Î¶³İÀ */
+    s4 s4t_ecdmfaem;        /* lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ‘S‹C“›¸‰Î¶³İÀ */
+    s4 s4t_ecmfot;          /* lsb=1,unit=‰ñ :•¡”‹C“›¸‰Î¶³İÀ */
+#if JEOOBD == u1g_EJCC_USE             /*ysê’²¸—Lz*/
+    s2 s2t_espd;            /* lsb=256/256,unit=km/h :Ô‘¬ */
+    s2 s2t_ene;             /* lsb=12800/64/256,unit=rpm :´İ¼Şİ‰ñ“]” */
+    s2 s2t_eklsm;           /* lsb=320/64/256,unit=% :‹ó‹C—Ê•‰‰×—¦iâ‘Î¿—Êj */
+    u1 u1t_ejmfne;          /* lsb=1 :‰ñ“]—Ìˆæ */
+#endif
+    s4 s4t_idx;             /* lsb=1 :‹C“›ŒQ•Ê‚Ì—v‘f” */
+    s4 s4t_bnk;             /* lsb=1 :¸‰Î‹C“›‚Ì‘®‚·‚éƒoƒ“ƒN */
+    s4 s4t_indx;            /* lsb=1 :¸‰Î‹C“›‚Ì‘®‚·‚éÀ‹C“›”Ô† */
+    u1 u1t_ncyl;            /* ƒ[ƒN•Ï” */
+    u1 u1t_ncyl_c;          /* lsb=1 :‹C“›” */
+    u1 u1t_ncylw_c;         /* lsb=1 :‹C“›ŒQ” */
+
+    if ( u1t_mfkind == u1g_EMFCNT_MLT )
+    {
+        /******************************/
+        /* ‘ÎŒü‹C“›ˆÈŠO‚Ì•¡”‹C“›¸‰Î */
+        /******************************/
+        s4t_ecmfot = (s4)u2g_emfng_ecmfot;
+        if ( s4t_ecmfot < (s4)u2g_U2MAX )
+        {
+            s4t_ecmfot++;                           /* CMFOT‚Ì²İ¸ØÒİÄ */
+        }
+        u2g_emfng_ecmfot = (u2)s4t_ecmfot;          /* lsb=1,unit=‰ñ */
+    }
+    else if ( u1t_mfkind == u1g_EMFCNT_OPPS )
+    {
+        /****************/
+        /* ‘ÎŒü‹C“›¸‰Î */
+        /****************/
+        u1t_ncylw_c = u1s_EMFNG_NCYLW;
+        for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncylw_c; s4t_i++ )
+        {
+            if ( u1g_emfng_mfwcyl_tbl[s4t_i] == u1t_mfcyl )
+            {
+                s4t_idx = s4t_i;
+                if ( u1g_emfng_ecdmfw[s4t_idx] < u1g_U1MAX )
+                {
+                    u1g_emfng_ecdmfw[s4t_idx]++;   /* ‹C“›ŒQ•Ê‚Ì‘ÎŒü‹C“›¸‰Î¶³İÀ */
+                }
+            }
+        }
+    }
+    else
+    {
+        /****************************************/
+        /* ±²ÄŞÙ/×İÀŞÑ/’Pˆê˜A‘±/2˜A‘±/ŠÔŒ‡ ¸‰Î */
+        /****************************************/
+        s4t_ecdmfaot       = (s4)u1g_emfng_ecdmfaot;
+        s4t_ecdmfae2       = (s4)u2g_emfng_ecdmfae2;
+        s4t_ecdmfaem       = (s4)u1g_emfng_ecdmfaem;
+        s4t_ecdmfaotbnk[0] = (s4)u1g_emfng_ecdmfaotbnk[0];
+        s4t_ecdmfaotbnk[1] = (s4)u1g_emfng_ecdmfaotbnk[1];
+        s4t_ecdmfaoti      = (s4)u2g_emfng_ecdmfaoti;
+#if JEOOBD == u1g_EJCC_USE             /*ysê’²¸—Lz*/
+        s2t_espd           = s2g_espd_espd;
+        s2t_ene            = s2g_ene_ene;
+        s2t_eklsm          = s2g_eklset_eklsm;
+        u1t_ejmfne         = u1g_emfne_ejmfne;
+#endif
+        u1t_ncyl_c = u1g_ejcc_NCYL;
+        u1t_ncyl = u1t_mfcyl;
+        for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncyl_c; s4t_i++ )
+        {
+            u1t_bit = (u1)(u1t_ncyl & (u1)0x01U);
+            if ( u1t_bit != (u1)0x00U )
+            {
+                s4t_bnk = (s4)u1s_emfng_mfcylbnk_tbl[s4t_i];   /* MFCYL‚©‚çƒoƒ“ƒN‚ğ‹‚ß‚é */
+                s4t_ecdmfaotbnk[s4t_bnk]++;                    /* ÊŞİ¸•ÊG”}OTÚÍŞÙ¸‰Î¶³İÀ */
+                s4t_ecdmfaot++;                                /* G”}OTÚÍŞÙ‘S‹C“›¸‰Î¶³İÀ */
+                s4t_ecdmfaoti++;                               /* ±²ÄŞÙ’†‘S‹C“›¸‰Î¶³İÀ */
+
+                s4t_indx = (s4)u1g_eengspc_ewcnvt_tbl[s4t_i];  /* MFCYL‚©‚çÀ‹C“›”Ô†‚ğ‹‚ß‚é */
+                if ( u1g_emfng_ecdmfem[s4t_indx] < u1g_U1MAX )
+                {
+                    u1g_emfng_ecdmfem[s4t_indx]++;             /* EMˆ«‰»ÚÍŞÙ‹C“›•Ê¸‰Î¶³İÀ */
+                }
+                if ( u2g_emfng_ecdmfem2[s4t_indx] < u2g_U2MAX )
+                {
+                    u2g_emfng_ecdmfem2[s4t_indx]++;            /* EMˆ«‰»ÚÍŞÙ‹C“›•Ê¸‰Î¶³İÀ */
+                }
+                if ( u1g_emfng_ecdmfemi[s4t_indx] < u1g_U1MAX )
+                {
+                    u1g_emfng_ecdmfemi[s4t_indx]++;            /* ±²ÄŞÙ’†‹C“›•Ê¸‰Î¶³İÀ */
+                }
+                s4t_ecdmfae2++;            /* EMˆ«‰»ÚÍŞÙ‘S‹C“›¸‰Î¶³İÀ */
+                s4t_ecdmfaem++;            /* EMˆ«‰»ÚÍŞÙ‘S‹C“›¸‰Î¶³İÀ */
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+                if ( bis_emfng_exjmfdi == (u1)ON )
+                {
+                    if ( u1s_emfng_ecdmfdi[s4t_indx] < u1g_U1MAX )
+                    {
+                        u1s_emfng_ecdmfdi[s4t_indx]++;             /* ‹C“›•ÊDI¸‰Î¶³İÀ */
+                    }
+                }
+                if ( bis_emfng_exjmfpfi == (u1)ON )
+                {
+                    if ( u1s_emfng_ecdmfpfi[s4t_indx] < u1g_U1MAX )
+                    {
+                        u1s_emfng_ecdmfpfi[s4t_indx]++;            /* ‹C“›•ÊPFI¸‰Î¶³İÀ */
+                    }
+                }
+#endif
+
+#if JEOOBD == u1g_EJCC_USE      /*ysê’²¸—Lz*/
+                s4s_emfng_espdaem  = s4g_gladdst_s4s4( s4s_emfng_espdaem, (s4)s2t_espd );
+                s4s_emfng_eneaem   = s4g_gladdst_s4s4( s4s_emfng_eneaem, (s4)s2t_ene );
+                s4s_emfng_eklsmaem = s4g_gladdst_s4s4( s4s_emfng_eklsmaem, (s4)s2t_eklsm );
+
+                if ( ( u1t_ejmfne == u1g_EMFNE_REV_IDLE2 )
+ #if JEMFHOUKI == u1g_EJCC_USAMF /*y‘Î•Ä–@‹Kz*/
+                  || ( u1t_ejmfne == u1g_EMFNE_REV_IDLE1 )
+ #endif
+                   )
+                {
+                    if ( u1s_emfng_ecjmfneemi < u1g_U1MAX )
+                    {
+                        u1s_emfng_ecjmfneemi++;
+                    }
+                }
+                if ( u1t_ejmfne == u1g_EMFNE_REV_LOW )
+                {
+                    if ( u1s_emfng_ecjmfneeml < u1g_U1MAX )
+                    {
+                        u1s_emfng_ecjmfneeml++;
+                    }
+                }
+                if ( u1t_ejmfne == u1g_EMFNE_REV_HIGH )
+                {
+                    if ( u1s_emfng_ecjmfneemh < u1g_U1MAX )
+                    {
+                        u1s_emfng_ecjmfneemh++;
+                    }
+                 }
+#endif
+
+            }
+            u1t_ncyl = (u1)(u1t_ncyl >> 1);
+        }
+
+        /* ƒK[ƒhˆ— */
+        if ( s4t_ecdmfaotbnk[0] > (s4)u1g_U1MAX )
+        {
+            s4t_ecdmfaotbnk[0] = (s4)u1g_U1MAX;
+        }
+        if ( s4t_ecdmfaotbnk[1] > (s4)u1g_U1MAX )
+        {
+            s4t_ecdmfaotbnk[1] = (s4)u1g_U1MAX;
+        }
+        if ( s4t_ecdmfaot > (s4)u1g_U1MAX )
+        {
+            s4t_ecdmfaot = (s4)u1g_U1MAX;
+        }
+        if ( s4t_ecdmfaoti > (s4)u2g_U2MAX )
+        {
+            s4t_ecdmfaoti = (s4)u2g_U2MAX;
+        }
+        if ( s4t_ecdmfae2 > (s4)u2g_U2MAX )
+        {
+            s4t_ecdmfae2 = (s4)u2g_U2MAX;
+        }
+        if ( s4t_ecdmfaem > (s4)u1g_U1MAX )
+        {
+            s4t_ecdmfaem = (s4)u1g_U1MAX;
+        }
+
+        /* RAMƒf[ƒ^‚ÉŠi”[ */
+        u2g_emfng_ecdmfae2       = (u2)s4t_ecdmfae2;            /* lsb=1,unit=‰ñ */
+        u1g_emfng_ecdmfaem       = (u1)s4t_ecdmfaem;            /* lsb=1,unit=‰ñ */
+        u1g_emfng_ecdmfaotbnk[0] = (u1)s4t_ecdmfaotbnk[0];      /* lsb=1,unit=‰ñ */
+        u1g_emfng_ecdmfaotbnk[1] = (u1)s4t_ecdmfaotbnk[1];      /* lsb=1,unit=‰ñ */
+        u1g_emfng_ecdmfaot       = (u1)s4t_ecdmfaot;            /* lsb=1,unit=‰ñ */
+        u2g_emfng_ecdmfaoti      = (u2)s4t_ecdmfaoti;           /* lsb=1,unit=‰ñ */
+
+    }   /* (u1t_mfkind == u1g_EMFCNT_MLT) end */
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_reset( )                                   */
+/*  ˆ—“à—e      | ¸‰Î”»’èØ¾¯Äˆ—                                 */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| TDC–ˆ(emfcnt_tdcm()‚æ‚èƒR[ƒ‹)                   */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      | ‘O’ñğŒ•s¬—§‚ÉÀ{(emfcnt)                   */
+/*********************************************************************/
+void
+emfng_reset( void )
+{
+    bis_emfng_exjmf   = (u1)OFF;
+    bis_emfng_exjtmf  = (u1)OFF;
+    bis_emfng_exjtmf2 = (u1)OFF;
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_drvclchg( )                                */
+/*  ˆ—“à—e      | ƒhƒ‰ƒCƒrƒ“ƒOƒTƒCƒNƒ‹ˆÚs‚Ì‰Šú‰»ˆ—           */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| emfcnt_drvclchg()‚æ‚èƒR[ƒ‹                      */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      |                                                  */
+/*********************************************************************/
+void
+emfng_drvclchg( void )
+{
+    s4 s4t_i;             /* lsb=1 :for loop—p */
+    u1 u1t_ncyl_c;        /* lsb=1 :‹C“›” */
+    u1 u1t_ncylw_c;       /* lsb=1 :‹C“›ŒQ” */
+
+    /* ¥¥¥ Š„‚è‚İ‹Ö~ ¥¥¥ */ /* ƒR[ƒ‹Œ³emfcnt_drvclchg()‚ÅÀ{ */
+    u2g_emfng_ecjmfot        = (u2)0;     /* 0‰Šú‰»‚Ì‚½‚ßLSBÈ—ª */
+    u2g_emfng_ecjmfem        = (u2)0;     /* 0‰Šú‰»‚Ì‚½‚ßLSBÈ—ª */
+    u2g_emfng_ecjmfoti       = (u2)0;     /* 0‰Šú‰»‚Ì‚½‚ßLSBÈ—ª */
+#if JETCORE_D == u1g_EJCC_USE     /*yt-CORE‘Î‰—Lz*/
+    big_emfng_exdmf     = (u1)OFF;
+#endif
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+    u2s_emfng_ecjmfdi   = (u2)0;     /* 0‰Šú‰»‚Ì‚½‚ßLSBÈ—ª */
+    u2s_emfng_ecjmfpfi  = (u2)0;     /* 0‰Šú‰»‚Ì‚½‚ßLSBÈ—ª */
+#endif
+    u1t_ncyl_c = u1g_ejcc_NCYL;
+    u1t_ncylw_c = u1s_EMFNG_NCYLW;
+
+    u2g_emfng_ecmfot         = (u2)0U;
+    for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncylw_c; s4t_i++ )
+    {
+        u1g_emfng_ecdmfw[s4t_i]    = (u1)0U;
+    }
+    u1g_emfng_ecdmfaotbnk[0] = (u1)0U;     /* CJMFOT‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+    u1g_emfng_ecdmfaotbnk[1] = (u1)0U;     /* CJMFOT‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+    u1g_emfng_ecdmfaot       = (u1)0U;     /* CJMFOT‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+    u2g_emfng_ecdmfaoti      = (u2)0U;     /* CJMFOTI‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+    u2g_emfng_ecdmfae2       = (u2)0U;     /* CJMFEM‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+    u1g_emfng_ecdmfaem       = (u1)0U;     /* CJMFEM‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+    u1g_emfng_ecdtmf2        = (u1)0U;
+    for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncyl_c ; s4t_i++ )
+    {
+        u1g_emfng_ecdmfem[s4t_i]   = (u1)0U;
+        u2g_emfng_ecdmfem2[s4t_i]  = (u2)0U;
+        u1g_emfng_ecdmfemi[s4t_i]  = (u1)0U;     /* CJMFEM‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+    }
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+    for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncyl_c; s4t_i++ )
+    {
+        u1s_emfng_ecdmfdi[s4t_i]   = (u1)(((0.)/(1.))+0.5);  /* ecjmfdi‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+        u1s_emfng_ecdmfpfi[s4t_i]  = (u1)(((0.)/(1.))+0.5);  /* ecjmfpfi‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+    }
+#endif
+    u2s_emfng_ecdtmfwa      = (u2)0U;
+
+    u1s_emfng_ecxmf         = (u1)0U;
+    u1s_emfng_ecxmf1        = (u1)0U;
+    big_emfng_exjokmf       = (u1)OFF;
+    u1s_emfng_ecjemrev      = (u1)0U;
+    bis_emfng_excntmf       = (u1)OFF;
+    bis_emfng_exdmf1        = (u1)OFF;
+    bis_emfng_exottd        = (u1)OFF;
+    s4s_emfng_emfrtotsum    = (s4)(((0.)/(256./128./256.))+0.5);
+    u2s_emfng_ecmfotcnt     = (u2)0U;
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+    big_emfng_exmfddi   = (u1)OFF;
+    big_emfng_exmfdied  = (u1)OFF;
+    big_emfng_exmfdpfi  = (u1)OFF;
+    big_emfng_exmfpfied = (u1)OFF;
+#endif
+
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    emfng_espdaemclr();
+#endif
+    /* £££ Š„‚è‚İ‹–‰Â £££ */ /* ƒR[ƒ‹Œ³emfcnt_drvclchg()‚ÅÀ{ */
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_16msl( )                                   */
+/*  ˆ—“à—e      | 16msÀ²Ğİ¸Şˆ—                                   */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| 16ms–ˆ(emfcnt_16msl()‚æ‚èƒR[ƒ‹)                 */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      |                                                  */
+/*********************************************************************/
+void
+emfng_16msl( void )
+{
+    s4 s4t_ejmfne;         /* lsb=1 :‰ñ“]—Ìˆæ */
+    s2 s2t_ethw;           /* lsb=160/256,unit= :´İ¼Şİ§Œä—p…‰· */
+    s2 s2t_etha;           /* lsb=160/256,unit= :´İ¼Şİ§Œä—p‹z‹C‰· */
+    s2 s2t_THA_c;          /* lsb=160/256,unit= :ƒzƒbƒgƒXƒ^[ƒg”»’è‹z‹C‰· */
+    s2 s2t_THWCSTH_c;      /* lsb=160/256,unit= :ƒR[ƒ‹ƒhƒXƒ^[ƒg”»’è…‰· */
+    s2 s2t_THACST_c;       /* lsb=160/256,unit= :ƒR[ƒ‹ƒhƒXƒ^[ƒg”»’è‹z‹C‰· */
+    s2 s2t_MFNEL3_c;       /* lsb=12800/64/256,unit=rpm :ƒAƒCƒhƒ‹—Ìˆæ”»’è’l */
+
+    s2t_ethw = s2g_ethw_ethw;
+    s2t_etha = s2g_etha_etha;
+    s2t_MFNEL3_c = s2s_emfng_MFNEL3;
+
+    if ( u1g_exst_exastnrm == (u1)OFF )
+    {
+        /***************/
+        /* Î¯Ä½À°Ä”»’è */
+        /***************/
+        s2t_THA_c = s2s_emfng_THA;
+        if ( ( s2t_ethw >= s2s_emfng_THW )
+          && ( s2t_etha >= s2t_THA_c ) )
+        {
+            big_emfng_exhstmf = (u1)ON;
+        }
+        else
+        {
+            big_emfng_exhstmf = (u1)OFF;
+        }
+
+        /*****************/
+        /* º°ÙÄŞ½À°Ä”»’è */
+        /*****************/
+        s2t_THWCSTH_c = s2s_emfng_THWCSTH;
+        s2t_THACST_c = s2s_emfng_THACST;
+        if ( ( s2t_ethw <= s2s_emfng_THWCSTL )
+          || ( ( s2t_ethw <= s2t_THWCSTH_c )
+            && ( s2t_etha <= s2t_THACST_c ) ) )
+        {
+            big_emfng_excstmf = (u1)ON;
+        }
+        else
+        {
+            big_emfng_excstmf = (u1)OFF;
+        }
+    }
+
+    /**********************************************/
+    /* G”}OTÚÍŞÙ±²ÄŞÙ¸‰ÎŒŸo‹–‰Â¶³İÀ‚Ì¸Ø±ˆ— */
+    /**********************************************/
+    /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+    s4t_ejmfne = (s4)u1g_emfne_ejmfne;
+    if ( ( ( s4t_ejmfne != (s4)u1g_EMFNE_REV_IDLE2 )
+#if JEMFHOUKI == u1g_EJCC_USAMF                                /*y‘Î•Ä–@‹Kz*/
+        && ( s4t_ejmfne != (s4)u1g_EMFNE_REV_IDLE1 )
+#endif
+         )
+      || ( s2g_ene_ene >= s2t_MFNEL3_c ) )
+    {
+        emfng_cdmfi_reset();
+    }
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_65msl( )                                   */
+/*  ˆ—“à—e      | 65msÀ²Ğİ¸Şˆ—                                   */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| 65ms–ˆ(emfcnt_65msl()‚æ‚èƒR[ƒ‹)                 */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      |                                                  */
+/*********************************************************************/
+void
+emfng_65msl( void )
+{
+    u1 u1t_xdmfem;          /* lsb=1 :EMˆ«‰»ÚÍŞÙˆÙíŒŸoÌ×¸Ş */
+    u1 u1t_xdmfot;          /* lsb=1 :G”}OTÚÍŞÙˆÙíŒŸoÌ×¸Ş */
+    u1 u1t_xumfot;          /* lsb=1 :G”}OTÚÍŞÙ³í”»’è•Û—¯Ì×¸Ş */
+    u1 u1t_xhmfoton;        /* lsb=1 :G”}OT‚É‚æ‚éMIL“_–Å—v‹Ì×¸Ş */
+    u1 u1t_xhmfotoff;       /* lsb=1 :G”}OT‚É‚æ‚éMIL“_–Å·¬İ¾Ù—v‹Ì×¸Ş */
+    u1 u1t_xumfem;          /* lsb=1 :EMˆ«‰»ÚÍŞÙ³í”»’è•Û—¯Ì×¸Ş */
+    u2 u2t_cdtmfwa;         /* lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ”»’è—pˆ«˜H¶³İÀ */
+    s4 s4t_cdmfae2;         /* lsb=1,unit=‰ñ :EMˆ«‰»ƒŒƒxƒ‹‘S‹C“›¸‰ÎƒJƒEƒ“ƒ^(”»’è—p) */
+    u4  u4t_cdmfaavTv;      /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ(‘S‹C“›)Ü°¸ */
+    u2  u2t_cdmfaavTv;      /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ(‘S‹C“›)Ü°¸(‘‚«‚İ—p) */
+    u2  u2t_ECDMFAAVMNTL_MI_c;  /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p‰ß‹10ƒgƒŠƒbƒvEWMA¸‰ÎƒJƒEƒ“ƒ^‰ºŒÀ’l(‘S‹C“›)‰Šú’l */
+    u2  u2t_cdmfaavMxtl;    /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ(‘S‹C“›)Ü°¸(‘‚«‚İ—p) */
+    u4  u4t_cdmfaemTv;      /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‘S‹C“›)Ü°¸           ymode$06-TID$0Cz*/
+    u4  u4t_cdmfavTv;       /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ(‹C“›•Ê)Ü°¸ ymode$06-TID$0Bz*/
+    u2  u2t_cdmfavTv;       /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ(‹C“›•Ê)Ü°¸(‘‚«‚İ—p) ymode$06-TID$0Bz*/
+    u2  u2t_ECDMFAVMNTL_MI_c ;  /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p‰ß‹10ƒgƒŠƒbƒvEWMA¸‰ÎƒJƒEƒ“ƒ^‰ºŒÀ’l(‹C“›•Ê)‰Šú’l */
+    u2  u2t_cdmfavMxtl;     /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ(‹C“›•Ê)Ü°¸(‘‚«‚İ—p) ymode$06-TID$0Bz*/
+    u4  u4t_cdmfemTv;       /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‹C“›•Ê)Ü°¸           ymode$06-TID$0Cz*/
+    s4  s4t_cyl;            /* lsb=1,unit=‹C“› */
+    u1  u1t_exrcdmf;        /* lsb=1 :EWMA¸‰Î¶³İÀŒvZ—š—ğÌ×¸Ş */
+    u2  u2t_ECDMFAEMTV_MI_c;    /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p¡ƒgƒŠƒbƒv—İÏ¸‰ÎƒJƒEƒ“ƒ^(‘S‹C“›)‰Šú’l */
+    u2  u2t_ECDMFEMTV_MI_c;     /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p¡ƒgƒŠƒbƒv—İÏ¸‰ÎƒJƒEƒ“ƒ^(‹C“›•Ê)‰Šú’l */
+#if JEMAT_OBD2 == u1g_EJCC_NOT_USE    /*yOBD2“K‡–³z*/
+    u1  u1t_xmfKwp;         /* lsb=1 :OBD2ÀŞ²±¸ŞÏ½¸î•ñ ¸‰Î */
+#endif
+
+    u1  u1t_xjokmf;         /* lsb=1 : n“®ŒãŠ’è‰ñ“]Š®—¹Ì×¸Ş */
+    u1  u1t_cjemrev;        /* lsb=1, unit=‰ñ : n“®Œã´Ğ¯¼®İˆ«‰»ÚÍŞÙ”»’è‰ñ” */
+    u1  u1t_xreqclr;        /* lsb=1 :ÃŞ°ÀÁ‹—v‹Ì×¸Ş */
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+    u1  u1t_xdmfdi;         /* lsb=1 : DIˆÙíÌ×¸Ş */
+    u1  u1t_xumfdi;         /* lsb=1 : DIˆÙí‚É‚æ‚é³í”»’è•Û—¯Ì×¸Ş */
+    u1  u1t_xdmfpfi;        /* lsb=1 : PFIˆÙíÌ×¸Ş */
+    u1  u1t_xumfpfi;        /* lsb=1 : PFIˆÙí‚É‚æ‚é³í”»’è•Û—¯Ì×¸Ş */
+    s4  s4t_i;              /* lsb=1 :forƒ‹[ƒv—p•Ï” */
+#endif
+    u1  u1t_exdisable;      /* lsb=1 :DisableÌ×¸Ş */
+    u1  u1t_excomplete;     /* lsb=1 :CompleteÌ×¸Ş */
+    u2  u2t_LJMFOT_c;       /* lsb=2/u1g_EJCC_NCYL,unit=rev :G”}OTƒŒƒxƒ‹ˆÙí”»’èÀsƒ^ƒCƒ~ƒ“ƒO */
+    u2  u2t_LJMFEM_c;       /* lsb=2/u1g_EJCC_NCYL,unit=rev :EMˆ«‰»ƒŒƒxƒ‹ˆÙí”»’èÀsƒ^ƒCƒ~ƒ“ƒO */
+    u2  u2t_LJMFOTF_c;      /* lsb=2/u1g_EJCC_NCYL,unit=rev :G”}OTƒŒƒxƒ‹ˆÙí”»’èÀsƒ^ƒCƒ~ƒ“ƒO */
+#if ( JETCORE_D == u1g_EJCC_USE ) && ( JEOBDUDS_D == u1g_EJCC_NOT_USE )     /*yt-CORE‘Î‰—LzANDyOBDonUDS‘Î‰–³z*/
+    u2 u2t_ecdmfaavTv;      /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ(‘S‹C“›)(–ß‚è’læ“¾—p) */
+    u2 u2t_ecdmfaavMntl;    /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ‰ºŒÀ’l(‘S‹C“›)(–ß‚è’læ“¾—p) */
+    u2 u2t_ecdmfaavMxtl;    /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀãŒÀ’l(‘S‹C“›)(–ß‚è’læ“¾—p) */
+    u2 u2t_dtrid;           /* lsb=1 :Ã½ÄŒ‹‰Êo—Í‚h‚c */
+    u2 u2t_ecdmfavTv;       /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ(‹C“›•Ê)(–ß‚è’læ“¾—p) */
+    u2 u2t_ecdmfavMntl;     /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ‰ºŒÀ’l(‹C“›•Ê)(–ß‚è’læ“¾—p) */
+    u2 u2t_ecdmfavMxtl;     /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀãŒÀ’l(‹C“›•Ê)(–ß‚è’læ“¾—p) */
+    u2 u2t_ecdmfaemTv;      /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‘S‹C“›)(–ß‚è’læ“¾—p) */
+    u2 u2t_ecdmfaemMntl;    /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ‰ºŒÀ’l(‘S‹C“›)(–ß‚è’læ“¾—p) */
+    u2 u2t_ecdmfaemMxtl;    /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀãŒÀ’l(‘S‹C“›)(–ß‚è’læ“¾—p) */
+    u2 u2t_ecdmfemTv;       /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‹C“›•Ê)(–ß‚è’læ“¾—p) */
+    u2 u2t_ecdmfemMntl;     /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ‰ºŒÀ’l(‹C“›•Ê)(–ß‚è’læ“¾—p) */
+    u2 u2t_ecdmfemMxtl;     /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀãŒÀ’l(‹C“›•Ê)(–ß‚è’læ“¾—p) */
+#endif
+    u1 u1t_ncyl_c;          /* lsb=1 :‹C“›” */
+
+    /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+    u1t_xdmfem    = (u1)OFF;
+    u1t_xdmfot    = (u1)OFF;
+    u1t_xumfot    = (u1)OFF;
+    u1t_xhmfoton  = (u1)OFF;
+    u1t_xhmfotoff = (u1)OFF;
+    u1t_xumfem    = (u1)OFF;
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+    u1t_xumfdi    = (u1)OFF;
+    u1t_xumfpfi   = (u1)OFF;
+    u1t_xdmfdi    = (u1)OFF;
+    u1t_xdmfpfi   = (u1)OFF;
+#endif
+
+    big_emfng_excdmfemclr  = (u1)OFF;                   /* ecdmfem[]¸Ø±—v‹Ì×¸Ş */
+    bis_emfng_excdmfem2clr = (u1)OFF;                   /* ecdmfem2[]¸Ø±—v‹Ì×¸Ş */
+    bis_emfng_excdmfwclr   = (u1)OFF;                   /* ecdmfw[]¸Ø±—v‹Ì×¸Ş */
+    bis_emfng_excdmfae2clr = (u1)OFF;
+#if JETCORE_D == u1g_EJCC_USE         /*yt-CORE‘Î‰—Lz*/
+    bis_emfng_exoutftp     = (u1)OFF;
+    bis_emfng_exemfst      = (u1)OFF;
+#endif
+
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+    bis_emfng_excdmfdiclr  = (u1)OFF;
+    bis_emfng_excdmfpficlr = (u1)OFF;
+#endif
+
+    u1t_xjokmf  = (u1)big_emfng_exjokmf;
+    u1t_cjemrev = u1s_emfng_ecjemrev;
+#if JEMAT_OBD2 == u1g_EJCC_NOT_USE    /*yOBD2“K‡–³z*/
+    u1t_xmfKwp  = (u1)big_wobd2msk_xmfKwp;
+#endif
+    u2t_LJMFOT_c = u2g_emfng_LJMFOT;
+    u2t_LJMFEM_c = u2g_emfng_LJMFEM;
+    u2t_LJMFOTF_c = u2s_emfng_LJMFOTF;
+#if JEMFDTC_D == u1g_EJCC_USE         /*y¸‰ÎOBD DTC—Lz*/
+    u1s_emfng_xem_lstpnd_Lch = (u1)big_wmf_fdi_xem_lstpnd;
+    u1s_emfng_xot_lstpnd_Lch = (u1)big_wmf_fdi_xot_lstpnd;
+    u1s_emfng_xot_warning_Lch = (u1)big_wmf_fdi_xot_warning;
+    u1s_emfng_xem_warning_Lch = (u1)big_wmf_fdi_xem_warning;
+#endif
+    u1s_emfng_state_Lch = u1g_wsentivchg_state;
+    u1t_ncyl_c = u1g_ejcc_NCYL;
+    u1s_emfng_xreqclr_Lch = (u1)big_wdiaginfclr_xreqclr;
+
+    /********************/
+    /* ŒvZ’l•Ï”‚ÌZo */
+    /********************/
+    emfng_mcr_cal();
+
+    /*************************************************/
+    /* ecdmfaavTvAecdmfavTv[](mode$06 TID$0B)‚ÌZo */
+    /*************************************************/
+
+    u1t_exrcdmf = u1s_emfng_exrcdmf();
+
+    if ( ( bis_emfng_excntmf == (u1)OFF )   /* ÄØ¯ÌßŒp‘±’†‚Å‚È‚¢ */
+      && ( u1t_exrcdmf == (u1)OFF ) )       /* ŒvZ—š—ğ‚ª‚È‚¢ */
+    {
+        u4t_cdmfaavTv = (u4)u2g_emfng_ecdmfaavTv();
+        u4t_cdmfaavTv = u4g_glmulstngrd_u2u2u2( (u2)u4t_cdmfaavTv, (u2)(((0.9)/(1./256./256.))+0.5), (u2)16U );
+
+        u4t_cdmfaemTv = (u4)u2g_emfng_ecdmfaemTv();
+        u4t_cdmfaemTv = u4g_glmulstngrd_u2u2u2( (u2)u4t_cdmfaemTv, (u2)(((0.1)/(1./256./256.))+0.5), (u2)16U );
+
+        /* ‘O‰ñecdmfaavTv*0.9 + ecdmfaemTv*0.1 */
+        u4t_cdmfaavTv += u4t_cdmfaemTv;
+        ELIB_HIGHGD2( u4t_cdmfaavTv, (u4)u2g_U2MAX, u4t_cdmfaavTv );
+        u2t_cdmfaavTv = (u2)u4t_cdmfaavTv;
+
+        /* ¡‰ñ¸‰Î‰ñ”*0.1{‘O‰ñ‚Ü‚Å‚Ì•½‹Ï*0.9(‘S‹C“›)ymode$06-TID$0Bz*/
+        (void)s4g_ememctr_write( u2g_EMFNG_ECDMFAAVTV_U2_ID, (void *)&u2t_cdmfaavTv );                 /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        /* ecdmfaavTv”»’è‰ºŒÀ */
+        u2t_ECDMFAAVMNTL_MI_c = u2g_emfng_ECDMFAAVMNTL_MI;
+        (void)s4g_ememctr_write( u2g_EMFNG_ECDMFAAVMNTL_U2_ID, (void *)&u2t_ECDMFAAVMNTL_MI_c );       /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        /* ecdmfaavTv”»’èãŒÀ */
+        u2t_cdmfaavMxtl = (u2)0xffffU;
+        (void)s4g_ememctr_write( u2g_EMFNG_ECDMFAAVMXTL_U2_ID, (void *)&u2t_cdmfaavMxtl );             /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+
+#if ( JETCORE_D == u1g_EJCC_USE ) && ( JEOBDUDS_D == u1g_EJCC_NOT_USE )                                /*yt-CORE‘Î‰—LzANDyOBDonUDS‘Î‰–³z*/
+        u2t_ecdmfaavTv   = u2g_emfng_ecdmfaavTv();
+        u2t_ecdmfaavMntl = u2g_emfng_ecdmfaavMntl();
+        u2t_ecdmfaavMxtl = u2g_emfng_ecdmfaavMxtl();
+        (void)u1g_wtcif_dem_setdtr_u2s4s4s4u1( u2g_WTCIF_DEM_DTR_ECDMFAAV, (s4)u2t_ecdmfaavTv, (s4)u2t_ecdmfaavMntl, (s4)u2t_ecdmfaavMxtl, u1g_WTCIF_DEM_DTR_CTL_NORMAL );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+        u2t_ECDMFAVMNTL_MI_c = u2g_emfng_ECDMFAVMNTL_MI;
+        for ( s4t_cyl = (s4)0; s4t_cyl < (s4)u1t_ncyl_c; s4t_cyl++ )
+        {
+            u4t_cdmfavTv = (u4)u2g_emfng_ecdmfavTv( (u1)s4t_cyl );
+            u4t_cdmfavTv = u4g_glmulstngrd_u2u2u2( (u2)u4t_cdmfavTv, (u2)(((0.9)/(1./256./256.))+0.5), (u2)16U );
+
+            u4t_cdmfemTv = (u4)u2g_emfng_ecdmfemTv( (u1)s4t_cyl );
+            u4t_cdmfemTv = u4g_glmulstngrd_u2u2u2( (u2)u4t_cdmfemTv, (u2)(((0.1)/(1./256./256.))+0.5), (u2)16U );
+
+            /* ‘O‰ñecdmfavTv[]*0.9 + ecdmfemTv[]*0.1 */
+            u4t_cdmfavTv += u4t_cdmfemTv;
+            ELIB_HIGHGD2( u4t_cdmfavTv, (u4)u2g_U2MAX, u4t_cdmfavTv );
+            u2t_cdmfavTv = (u2)u4t_cdmfavTv;
+
+            /* ¡‰ñ¸‰Î‰ñ”*0.1{‘O‰ñ‚Ü‚Å‚Ì•½‹Ï*0.9(‹C“›•Ê) ymode$06-TID$0Bz */
+            (void)s4g_ememctr_write( u2s_ECDMFAVTV_U2_ID[s4t_cyl], (void *)&u2t_cdmfavTv );            /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+            /* ecdmfavTv[]”»’è‰ºŒÀ */
+            (void)s4g_ememctr_write( u2s_ECDMFAVMNTL_U2_ID[s4t_cyl], (void *)&u2t_ECDMFAVMNTL_MI_c );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+            /* ecdmfavTv[]”»’èãŒÀ */
+            u2t_cdmfavMxtl = (u2)0xffffU;
+            (void)s4g_ememctr_write( u2s_ECDMFAVMXTL_U2_ID[s4t_cyl], (void *)&u2t_cdmfavMxtl );        /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#if ( JETCORE_D == u1g_EJCC_USE ) && ( JEOBDUDS_D == u1g_EJCC_NOT_USE )                                /*yt-CORE‘Î‰—LzANDyOBDonUDS‘Î‰–³z*/
+            u2t_dtrid = u2s_emfng_ecdmfav_tbl[s4t_cyl];
+            u2t_ecdmfavTv   = u2g_emfng_ecdmfavTv( (u1)s4t_cyl );
+            u2t_ecdmfavMntl = u2g_emfng_ecdmfavMntl( (u1)s4t_cyl );
+            u2t_ecdmfavMxtl = u2g_emfng_ecdmfavMxtl( (u1)s4t_cyl );
+            (void)u1g_wtcif_dem_setdtr_u2s4s4s4u1( u2t_dtrid, (s4)u2t_ecdmfavTv, (s4)u2t_ecdmfavMntl, (s4)u2t_ecdmfavMxtl, u1g_WTCIF_DEM_DTR_CTL_NORMAL );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+        }
+        /**************************************/
+        /* exrcdmf(mode$06ŒvZ—š—ğÌ×¸Ş)‚Ì‘€ì */
+        /**************************************/
+        u1t_exrcdmf = (u1)ON;
+        (void)s4g_ememctr_write( u2g_EMFNG_EXRCDMF_U1_ID, (void *)&u1t_exrcdmf );                      /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+    }
+
+    /*******************************/
+    /* mode$06—p ¸‰Î¶³İÀ‚Ì¸Ø±ˆ— */
+    /*******************************/
+    if ( ( bis_emfng_excntmf == (u1)OFF )       /* ÄØ¯ÌßŒp‘±’†‚Å‚È‚¢ */
+#if JEOBDUDS_D == u1g_EJCC_NOT_USE              /*yOBDonUDS‘Î‰–³z*/
+      && ( u1g_exst_exastnrm == (u1)ON )        /* exastnrm OFF->ON */
+#else                                           /*yOBDonUDS‘Î‰—Lz*/
+      && ( big_wpsajdg_xpsa == (u1)ON )         /* xpsa OFF->ON */
+#endif
+       )
+    {   /* n“®ŒãA‰‰ñğŒ¬—§‚Åbis_emfng_excntmf=ON‚Æ‚È‚éˆ×Au1g_exst_exastnrm/big_wpsajdg_xpsa == ON‚Å”»’è‚·‚é */
+        /* Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‘S‹C“›)¸Ø±ymode$06-TID$0Cz*/
+        u2t_ECDMFAEMTV_MI_c = u2g_emfng_ECDMFAEMTV_MI;
+        (void)s4g_ememctr_write( u2g_EMFNG_ECDMFAEMTV_U2_ID, (void *)&u2t_ECDMFAEMTV_MI_c );           /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+
+        u2t_ECDMFEMTV_MI_c = u2g_emfng_ECDMFEMTV_MI;
+#if ( JETCORE_D == u1g_EJCC_USE ) && ( JEOBDUDS_D == u1g_EJCC_NOT_USE )                            /*yt-CORE‘Î‰—LzANDyOBDonUDS‘Î‰–³z*/
+        u2t_ecdmfaemTv   = u2g_emfng_ecdmfaemTv();
+        u2t_ecdmfaemMntl = u2g_emfng_ecdmfaemMntl();
+        u2t_ecdmfaemMxtl = u2g_emfng_ecdmfaemMxtl();
+         (void)u1g_wtcif_dem_setdtr_u2s4s4s4u1( u2g_WTCIF_DEM_DTR_ECDMFAEM, (s4)u2t_ecdmfaemTv, (s4)u2t_ecdmfaemMntl, (s4)u2t_ecdmfaemMxtl, u1g_WTCIF_DEM_DTR_CTL_NORMAL );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+        for ( s4t_cyl = (s4)0; s4t_cyl < (s4)u1t_ncyl_c; s4t_cyl++ )
+        {
+            /* Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‹C“›•Ê)¸Ø±ymode$06-TID$0Cz*/
+            (void)s4g_ememctr_write( u2s_ECDMFEMTV_U2_ID[s4t_cyl], (void *)&u2t_ECDMFEMTV_MI_c );      /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#if ( JETCORE_D == u1g_EJCC_USE ) && ( JEOBDUDS_D == u1g_EJCC_NOT_USE )                            /*yt-CORE‘Î‰—LzANDyOBDonUDS‘Î‰–³z*/
+            u2t_dtrid       = u2s_emfng_ecdmfem_tbl[s4t_cyl];
+            u2t_ecdmfemTv   = u2g_emfng_ecdmfemTv( (u1)s4t_cyl );
+            u2t_ecdmfemMntl = u2g_emfng_ecdmfemMntl( (u1)s4t_cyl );
+            u2t_ecdmfemMxtl = u2g_emfng_ecdmfemMxtl( (u1)s4t_cyl );
+            (void)u1g_wtcif_dem_setdtr_u2s4s4s4u1( u2t_dtrid, (s4)u2t_ecdmfemTv, (s4)u2t_ecdmfemMntl, (s4)u2t_ecdmfemMxtl, u1g_WTCIF_DEM_DTR_CTL_NORMAL );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+        }
+
+        /* exrcdmf(mode$06ŒvZ—š—ğÌ×¸Ş)‚Ì¸Ø± */
+        u1t_exrcdmf = (u1)OFF;
+        (void)s4g_ememctr_write( u2g_EMFNG_EXRCDMF_U1_ID, (void *)&u1t_exrcdmf );                      /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+
+        bis_emfng_excntmf = (u1)ON;     /* ÄØ¯ÌßŒp‘±Ì×¸Ş¾¯Ä */
+    }
+
+    /**************************************/
+    /* G”}OTÚÍŞÙˆÙíŒŸo‰¼‹L‰¯Ì×¸Ş‚Ì‘€ì */
+    /**************************************/
+    emfng_xottd_cal();
+
+    /**************************/
+    /* G”}OTÚÍŞÙ‚ÌˆÙí‚ÌŒŸo */
+    /**************************/
+    if ( ( u2g_emfng_ecjmfot >= u2t_LJMFOT_c )      /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev */
+      || ( ( u2g_emfng_ecjmfem >= u2t_LJMFEM_c )
+        && ( u2g_emfng_ecjmfot >= u2t_LJMFOTF_c ) ) )
+    {
+        /****************/
+        /* ŒŸoğŒ”»’è */
+        /****************/
+        emfng_ot_detect_ptptptpt( &u1t_xumfot, &u1t_xdmfot, &u1t_xhmfoton, &u1t_xhmfotoff );
+
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+        /*******************/
+        /* sê’²¸RAMXV */
+        /*******************/
+        emfng_eocmfmlt_pt( &u1g_emfng_ecdmfw[0] );
+#endif
+
+        /*****************************/
+        /* mode$06‘Î‰¸‰Î¶³İÀ‚Ì‘€ì */
+        /*****************************/
+        emfng_emode06_cal();
+
+        /**********************************/
+        /* G”}OTÚÍŞÙˆÙíŒŸoI—¹‚Ìˆ— */
+        /**********************************/
+        glint_di(); /* ¥¥¥ Š„‚è‚İ‹Ö~ ¥¥¥ */
+
+        /* ŠeíƒJƒEƒ“ƒ^‚ÌƒNƒŠƒAˆ— */
+        u2g_emfng_ecjmfot        = (u2)0U;
+        u1g_emfng_ecdmfaotbnk[0] = (u1)0U;   /* CJMFOT‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+        u1g_emfng_ecdmfaotbnk[1] = (u1)0U;   /* CJMFOT‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+        u1g_emfng_ecdmfaot       = (u1)0U;   /* CJMFOT‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+        u1g_emfng_ecdtmf2        = (u1)0U;   /* CJMFOT‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+        u2g_emfng_ecmfot         = (u2)0U;   /* CJMFOT‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+        s4s_emfng_emfrtotsum     = (s4)0;    /* CJMFOT‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+        u2s_emfng_ecmfotcnt      = (u2)0U;   /* CJMFOT‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+        bis_emfng_excdmfwclr  = (u1)ON;      /* CDMFW‚ÍÀŞ²±¸Şº°ÄŞˆ—Œã‚ÉƒNƒŠƒA‚·‚é */
+        big_emfng_excdmfemclr = (u1)ON;      /* CDMFEM‚ÍÀŞ²±¸Şº°ÄŞˆ—Œã‚ÉƒNƒŠƒA‚·‚é */
+
+        glint_ei(); /* £££ Š„‚è‚İ‹–‰Â £££ */
+    }   /* G”}OTÚÍŞÙˆÙíŒŸoÀ²Ğİ¸Ş end */
+
+    /***************************/
+    /* ¸‰Î‚ÌNE,•‰‰×XV’Ê’m */
+    /***************************/
+    if ( ( u1t_xdmfot == (u1)ON )                  /* G”}OTƒŒƒxƒ‹ˆÙí */
+      && ( big_emfng_excdmfw == (u1)ON ) )         /* ‘ÎŒü‹C“›¸‰Î(y4‹C“›z‚ÍOFFŒÅ’è) */
+    {
+        emfok_mfneld_ann();
+    }
+
+    /************************/
+    /* EMˆ«‰»ÚÍŞÙˆÙí‚ÌŒŸo */
+    /************************/
+#if ( JEMFDTC_D == u1g_EJCC_USE ) && ( JETCORE_D == u1g_EJCC_USE ) && ( JEOBDUDS_D == u1g_EJCC_USE )    /*y¸‰ÎOBD DTC—LzANDyt-CORE‘Î‰—LzANDyOBDonUDS‘Î‰—Lz*/
+    u1s_emfng_pas = (u1)OFF;                    /* ‚d‚lˆ«‰»ƒŒƒxƒ‹”»’èƒ^ƒCƒ~ƒ“ƒO•s¬—§”»’èÌ×¸ŞOFF */
+#endif
+    if ( u2g_emfng_ecjmfem >= u2t_LJMFEM_c ) /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev ÀsÀ²Ğİ¸Ş */
+    {
+#if ( JEMFDTC_D == u1g_EJCC_USE ) && ( JETCORE_D == u1g_EJCC_USE ) && ( JEOBDUDS_D == u1g_EJCC_USE )    /*y¸‰ÎOBD DTC—LzANDyt-CORE‘Î‰—LzANDyOBDonUDS‘Î‰—Lz*/
+        u1s_emfng_pas = (u1)ON;                 /* ‚d‚lˆ«‰»ƒŒƒxƒ‹”»’èƒ^ƒCƒ~ƒ“ƒO¬—§”»’èÌ×¸ŞON */
+                                                /* emfng_wxmf_out()ƒR[ƒ‹‘O‚ÉÀ{ */
+#endif
+#if JEEFI == u1g_EJCC_DUAL   /*yÃŞ­±ÙINJz*/
+        /**********************************/
+        /* Še•¬ËÓ°ÄŞ¸Ø±—p1000rev”»’è’Ê’m */
+        /**********************************/
+        emfok_mfcmodclr();
+#endif
+
+        /* ˆ«˜Hó‘ÔƒJƒEƒ“ƒ^‚ªŠ’è‰ñ”ˆÈã‚Å‚Íu¸‰ÎƒJƒEƒ“ƒ^-ˆ«˜HƒJƒEƒ“ƒ^~nv‚ÅˆÙí”»’è */
+        u2t_cdtmfwa = u2s_emfng_ecdtmfwa;
+
+        s4t_cdmfae2 = (s4)u2g_emfng_ecdmfae2;
+        if ( u2t_cdtmfwa >= (u2)u1g_emfng_CDTMFWA )
+        {
+            s4t_cdmfae2 -= (s4)u4g_glmulstngrd_u2u2u2( u2t_cdtmfwa, (u2)u1s_emfng_KCDTMFWA, (u2)5U );
+                                     /* 1*8/256 -> 1(‰ñ)  u2*u1‚Ì‚½‚ßAs4‚©‚ç‚ÌƒI[ƒo[ƒtƒ[–³‚µ */
+            ELIB_LOWGD2( s4t_cdmfae2, (s4)0, s4t_cdmfae2 );            /* ‰ºŒÀƒK[ƒh */
+        }
+
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+        /*******************/
+        /* sê’²¸RAMXV */
+        /*******************/
+        emfng_eocmfn_u2( (u2)s4t_cdmfae2 );    /* (u2-u2*u1)‚Ì‚½‚ßAu2‚ÌãŒÀ‘¤ƒK[ƒh•s—v */
+#endif
+
+        /****************/
+        /* ŒŸoğŒ”»’è */
+        /****************/
+        emfng_em_detect_u2ptpt( (u2)s4t_cdmfae2, &u1t_xdmfem, &u1t_xumfem );
+
+        /**********************************/
+        /* EMˆ«‰»ÚÍŞÙˆÙíŒŸoI—¹‚Ìˆ— */
+        /**********************************/
+        glint_di(); /* ¥¥¥ Š„‚è‚İ‹Ö~ ¥¥¥ */
+
+        /* ŠeíƒJƒEƒ“ƒ^‚ÌƒNƒŠƒAˆ— */
+        u2g_emfng_ecjmfot        = (u2)0U;
+        u1g_emfng_ecdmfaotbnk[0] = (u1)0U;      /* CJMFOT‚Æ“¯‚É¸Ø±‚·‚é */
+        u1g_emfng_ecdmfaotbnk[1] = (u1)0U;      /* CJMFOT‚Æ“¯‚É¸Ø±‚·‚é */
+        u1g_emfng_ecdmfaot       = (u1)0U;      /* CJMFOT‚Æ“¯‚É¸Ø±‚·‚é */
+        bis_emfng_excdmfwclr     = (u1)ON;      /* CDMFW‚ÍÀŞ²±¸Şº°ÄŞˆ—Œã‚É¸Ø±‚·‚é */
+        u2g_emfng_ecjmfem        = (u2)0U;
+        bis_emfng_excdmfae2clr   = (u1)ON;      /* CDMFAE2‚ÍÀŞ²±¸Şº°ÄŞˆ—Œã‚É¸Ø±‚·‚é */
+        u1g_emfng_ecdmfaem       = (u1)0U;      /* CJMFEM‚Æ“¯‚É¸Ø±‚·‚é */
+        u2g_emfng_ecmfot         = (u2)0U;      /* CJMFOT‚Æ“¯‚É¸Ø±‚·‚é */
+        u2s_emfng_ecdtmfwa       = (u2)0U;      /* CJMFEM‚Æ“¯‚É¸Ø±‚·‚é */
+        u1g_emfng_ecdtmf2        = (u1)0U;      /* CJMFOT‚Æ“¯‚É¸Ø±‚·‚é */
+        s4s_emfng_emfrtotsum     = (s4)0;       /* CJMFOT‚Æ“¯‚É¸Ø±‚·‚é */
+        u2s_emfng_ecmfotcnt      = (u2)0U;      /* CJMFOT‚Æ“¯‚É¸Ø±‚·‚é */
+        big_emfng_excdmfemclr    = (u1)ON;      /* CDMFEM‚ÍÀŞ²±¸Şº°ÄŞˆ—Œã‚É¸Ø±‚·‚é */
+        bis_emfng_excdmfem2clr   = (u1)ON;      /* CDMFEM2‚ÍÀŞ²±¸Şº°ÄŞˆ—Œã‚É¸Ø±‚·‚é */
+
+        glint_ei(); /* £££ Š„‚è‚İ‹–‰Â £££ */
+
+        u1t_xjokmf  = (u1)ON;            /* EMˆ«‰»ÚÍŞÙˆÙí”»’èŒã‚É1ÄØ¯Ìß”»’èÀsÌ×¸ŞON */
+        if ( u1t_cjemrev < u1g_U1MAX )
+        {
+            u1t_cjemrev++;
+        }
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+        /* sê’²¸RAM‚Ì¸Ø±ˆ— */
+        emfng_espdaemclr();
+#endif
+    }   /* EMˆ«‰»ÚÍŞÙ”»’èÀ²Ğİ¸Ş end */
+
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+    /********************/
+    /* DIˆÙí‚ÌŒŸo”»’è */
+    /********************/
+    if ( u2s_emfng_ecjmfdi >= u2t_LJMFOT_c )
+    {
+        emfng_di_detect_ptpt( &u1t_xdmfdi, &u1t_xumfdi );
+    }
+
+    /*********************/
+    /* PFIˆÙí‚ÌŒŸo”»’è */
+    /*********************/
+    if ( u2s_emfng_ecjmfpfi >= u2t_LJMFOT_c )
+    {
+        emfng_pfi_detect_ptpt( &u1t_xdmfpfi, &u1t_xumfpfi );
+    }
+#endif
+
+    /* G”}OTÚÍŞÙ,EMˆ«‰»ÚÍŞÙ,DI,PFI‚ÌˆÙí¥³í”»’è•Û—¯¥MIL“_–Å—v‹‚ÌŒ‹‰Ê‚ğRAM‚Ö */
+    /* emfng_wxmf_out()ƒR[ƒ‹‘O‚ÉÀ{ */
+    glbitcp_bibi( u1t_xdmfot,    bis_emfng_exdmfot );         /* G”}OTÚÍŞÙˆÙí”»’èÌ×¸Ş */
+    glbitcp_bibi( u1t_xumfot,    bis_emfng_exumfot );         /* G”}OTÚÍŞÙ³í”»’è•Û—¯Ì×¸Ş */
+    glbitcp_bibi( u1t_xhmfoton,  bis_emfng_exhmfoton );       /* G”}OT‚É‚æ‚éMIL“_–Å—v‹Ì×¸Ş */
+    glbitcp_bibi( u1t_xhmfotoff, bis_emfng_exhmfotoff );      /* G”}OT‚É‚æ‚éMIL“_–Å·¬İ¾Ù—v‹Ì×¸Ş */
+    glbitcp_bibi( u1t_xdmfem,    bis_emfng_exdmfem );         /* EMˆ«‰»ÚÍŞÙˆÙíŒŸoÌ×¸Ş */
+    glbitcp_bibi( u1t_xumfem,    bis_emfng_exumfem );         /* EMˆ«‰»ÚÍŞÙ³í”»’è•Û—¯Ì×¸Ş */
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+    glbitcp_bibi( u1t_xdmfdi,    bis_emfng_exdmfdi );         /* DIˆÙíÌ×¸Ş */
+    glbitcp_bibi( u1t_xumfdi,    bis_emfng_exumfdi );         /* DIˆÙí‚É‚æ‚é³í”»’è•Û—¯Ì×¸Ş */
+    glbitcp_bibi( u1t_xdmfpfi,   bis_emfng_exdmfpfi );        /* PFIˆÙíÌ×¸Ş */
+    glbitcp_bibi( u1t_xumfpfi,   bis_emfng_exumfpfi );        /* PFIˆÙí‚É‚æ‚é³í”»’è•Û—¯Ì×¸Ş */
+#endif
+
+#if JEMFDTC_D == u1g_EJCC_USE /*y¸‰ÎOBD DTC—Lz*/
+    /********************/
+    /* “d‹Z‚Ö‚Ì’Ê’mˆ— */
+    /********************/
+    emfng_wxmf_out();
+#endif
+
+    /**************************/
+    /* ƒ_ƒCƒAƒO‚©‚ç‚ÌÁ‹—v‹ */
+    /**************************/
+    u1t_xreqclr = u1s_emfng_wxreqclr();
+    if ( u1t_xreqclr == (u1)ON )
+    {
+        u1t_xjokmf       = (u1)OFF;
+        u1t_cjemrev      = (u1)0U;             /* exjokmf‚Æ“¯‚É¸Ø± */
+        bis_emfng_exdmf1 = (u1)OFF;
+    }
+
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+    if ( bis_emfng_excdmfdiclr == (u1)ON )
+    {
+        for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncyl_c; s4t_i++ )
+        {
+            u1s_emfng_exdmfdim[s4t_i] = (u1)OFF;
+        }
+    }
+    if ( bis_emfng_excdmfpficlr == (u1)ON )
+    {
+        for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncyl_c; s4t_i++ )
+        {
+            u1s_emfng_exdmfpfim[s4t_i] = (u1)OFF;
+        }
+    }
+#endif
+
+    /* DisableÌ×¸Ş‚Ì‘€ì */
+    u1t_exdisable = (u1)OFF;  /*yOBD2“K‡—LzANDy‘Î•Ä–@‹Kz‚ÍOFFŒÅ’è */
+#if JEMAT_OBD2 == u1g_EJCC_NOT_USE    /*yOBD2“K‡–³z*/
+    if ( u1t_xmfKwp == (u1)ON )
+    {
+        u1t_exdisable = (u1)ON;
+    }
+#endif
+#if JEMFHOUKI == u1g_EJCC_NOT_USAMF  /*y‘Î•Ä–@‹KˆÈŠOz*/
+    if ( s2g_etha_etha < (s2)(((-10.)/(160./256.)) - 0.5) )
+    {
+        u1t_exdisable = (u1)ON;
+    }
+#endif
+    if ( u1t_xreqclr == (u1)ON )   /* ƒf[ƒ^Á‹—v‹ */
+    {
+        u1t_exdisable = (u1)OFF;
+    }
+
+    /* CompleteÌ×¸Ş‚Ì‘€ì */
+#if JEMAT_OBD2 == u1g_EJCC_NOT_USE    /*yOBD2“K‡–³z*/
+    u1t_excomplete = (u1)OFF;
+    if ( u1t_xmfKwp == (u1)OFF )
+#endif
+    {
+        u1t_excomplete = (u1)ON;  /*yOBD2“K‡—Lz‚ÍONŒÅ’è */
+    }
+
+    /* RAMƒf[ƒ^‚ÉŠi”[ */
+    u1s_emfng_ecjemrev = u1t_cjemrev;
+    glbitcp_bibi( u1t_xjokmf, big_emfng_exjokmf );
+    glbitcp_bibi( u1t_excomplete, big_emfng_excomplete );
+    glbitcp_bibi( u1t_exdisable, big_emfng_exdisable );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_mcr_cal( )                                 */
+/*  ˆ—“à—e      | ŒvZ’l•Ï”‚ÌZo                                 */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| pwon,65ms(emfng_pwon(),emfng_65msl()‚©‚çƒR[ƒ‹)  */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      | “à•”ŠÖ”                                         */
+/*********************************************************************/
+static void
+emfng_mcr_cal( void )
+{
+    u4 u4t_ekldmfw1_mcr;        /* lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î‰ñ””»’è‰ºŒÀ’l(ŒvZ’l) */
+#if JENCYL == u1g_EJCC_6CYL     /*y6‹C“›z*/
+    u4 u4t_ekldmfw2_mcr;        /* lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î‰ñ””»’èãŒÀ’l(ŒvZ’l) */
+#endif
+    u4 u4t_ekldmfoth_mcr;       /* lsb=1,unit=‰ñ :G”}OTÚÍŞÙ¸‰Î‰ñ””»’è’l(ŒvZ’l) */
+    u4 u4t_eldmfaem_mcr;        /* lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ¸‰Î‰ñ””»’è’l(ŒvZ’l) */
+    u2 u2t_LJMFOT_c;            /* lsb=2/u1g_EJCC_NCYL,unit=rev :G”}OTƒŒƒxƒ‹ˆÙí”»’èÀsƒ^ƒCƒ~ƒ“ƒO */
+    u2 u2t_LJMFEM_c;            /* lsb=2/u1g_EJCC_NCYL,unit=rev :EMˆ«‰»ÚÍŞÙˆÙí”»’èÀsÀ²Ğİ¸Ş */
+    u2 u2t_KLDMFOT_c;           /* lsb=1,unit=‰ñ :G”}OTÚÍŞÙ¸‰Î‰ñ””»’è’l(100“_‰Î/1‹C“›•Ó‚è) */
+
+    /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+    u2t_LJMFOT_c = u2g_emfng_LJMFOT;
+    u2t_LJMFEM_c = u2g_emfng_LJMFEM;
+    u2t_KLDMFOT_c = u1s_emfng_KLDMFOT;
+
+    /* ‘ÎŒü‹C“›¸‰Î‰ñ””»’è‰ºŒÀ’l(ŒvZ’l)‚ÌZo */
+    /* ekldmfw1_mcr © emfng_LJMFOT – ((‹C“›”^2) ^ (‹C“›”^2)) – emfng_KLD1 */
+    u4t_ekldmfw1_mcr = u4g_glmulstngrd_u2u2u2( u2t_LJMFOT_c, (u2)u1s_emfng_KLD1, (u2)6U );
+    u4t_ekldmfw1_mcr = (u4)u2g_gldiv_u4u2( u4t_ekldmfw1_mcr, (u2)u1g_ejcc_NCYL );
+                                                /* lsb=(2/NCYL)*(2/256) -> 1,unit=‰ñ */
+    ELIB_HIGHGD2( u4t_ekldmfw1_mcr, (u4)u1g_U1MAX, u4t_ekldmfw1_mcr );
+    u1s_emfng_ekldmfw1_mcr = (u1)u4t_ekldmfw1_mcr;
+
+#if JENCYL == u1g_EJCC_6CYL     /*y6‹C“›z*/
+    /* ‘ÎŒü‹C“›¸‰Î‰ñ””»’èãŒÀ’l(ŒvZ’l)‚ÌZo */
+    /* ekldmfw2_mcr © emfng_LJMFOT – ((‹C“›”^2) ^ (‹C“›”^2)) – emfng_KLD2 */
+    u4t_ekldmfw2_mcr = u4g_glmulstngrd_u2u2u2( u2t_LJMFOT_c, (u2)u1s_emfng_KLD2, (u2)6U );
+    u4t_ekldmfw2_mcr = (u4)u2g_gldiv_u4u2( u4t_ekldmfw2_mcr, (u2)u1g_ejcc_NCYL );
+                                                /* lsb=(2/NCYL)*2/256 -> 1,unit=‰ñ */
+    ELIB_HIGHGD2( u4t_ekldmfw2_mcr, (u4)u1g_U1MAX, u4t_ekldmfw2_mcr );
+    u1s_emfng_ekldmfw2_mcr = (u1)u4t_ekldmfw2_mcr;
+#endif
+
+    /* G”}OTÚÍŞÙ¸‰Î‰ñ””»’è’l(ŒvZ’l)‚ÌZo */
+    u4t_ekldmfoth_mcr = u4g_glmul_u2u2( (u2)u2t_KLDMFOT_c, (u2)u1g_ejcc_NCYL );
+                                                /* lsb=1 * 1 -> 1,unit=‰ñ */
+    u4t_ekldmfoth_mcr = (u4)u2g_gldiv_u4u2( u4t_ekldmfoth_mcr, (u2)u1g_emfng_CATN );
+                                                /* lsb=1 / 1 -> 1,unit=‰ñ */
+    u2g_emfng_ekldmfoth_mcr = (u2)u4t_ekldmfoth_mcr;
+
+    /* EMˆ«‰»ÚÍŞÙ¸‰Î‰ñ””»’è’l(ŒvZ’l)‚ÌZo */
+    /* eldmfaem_mcr © emfng_LJMFEM – (‹C“›”^2) – emfng_MFDD ^ 100 – emfng_MFD1 */
+    u4t_eldmfaem_mcr = u4g_glmul_u2u2( u2t_LJMFEM_c, (u2)s2s_emfng_MFDD );  /* emfng_MFDD(¸‰Î—¦)‚Í•K‚¸³‚Ì‚½‚ßu2ƒLƒƒƒXƒg‚µ‚ÄOK */
+                                                /* lsb=(2/NCYL)*(256/128/256) -> 256/128/256 */
+                                                /* emfng_LJMFEM‚ÌLSB•ÏŠ·‚Æ(‹C“›”/2)‚Ì‰‰ZŒ‹‰Ê‚ª1‚É‚È‚é‚½‚ßˆ—È—ª */
+    u4t_eldmfaem_mcr = u4g_glmulst_u4u4u2( u4t_eldmfaem_mcr, (u4)u2s_emfng_MFD1, (u2)22U );
+                                                /* lsb=(256/128/256)*(2/256/256) -> 1 */
+    u4t_eldmfaem_mcr = (u4)u2g_gldiv_u4u2( u4t_eldmfaem_mcr, (u2)100U );
+    u2g_emfng_eldmfaem_mcr = (u2)u4t_eldmfaem_mcr;
+
+    /* º°ÙÄŞ½À°ÄEMˆ«‰»ÚÍŞÙ¸‰Î‰ñ””»’è’l(ŒvZ’l)‚ÌZo */
+    u2s_emfng_eldmfst1_mcr = u2g_glmulst_u2u2u2( (u2)u4t_eldmfaem_mcr, (u2)u1s_emfng_ST1RTO, (u2)5U );
+                                                /* lsb=1 * (8/256) -> 1,unit=‰ñ */
+
+    /* Î¯Ä½À°ÄEMˆ«‰»ÚÍŞÙ¸‰Î‰ñ””»’è’l(ŒvZ’l)‚ÌZo */
+    u2s_emfng_eldmfst2_mcr = u2g_glmulst_u2u2u2( (u2)u4t_eldmfaem_mcr, (u2)u1s_emfng_ST2RTO, (u2)5U );
+                                                /* lsb=1 * (8/256) -> 1,unit=‰ñ */
+
+    /* DTCo—Í‹C“›”»’è’l(ŒvZ’l)‚ÌZo */
+    u2s_emfng_emfk_mcr = u2g_glmulst_u2u2u2( (u2)u4t_eldmfaem_mcr, (u2)u1s_emfng_KMFK, (u2)7U );
+                                                /* lsb=1 * (2/256) -> 1,unit=‰ñ */
+
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    /* ¸‰Î‰ñ”¬A’†A‘å•p“x”»’è‰ñ”‚ÌZo */
+    u2s_emfng_ecmfnl_mcr = u2g_glmulst_u2u2u2( (u2)u4t_eldmfaem_mcr, (u2)u1s_emfng_MFLOW, (u2)7U );
+    u2s_emfng_ecmfnm_mcr = u2g_glmulst_u2u2u2( (u2)u4t_eldmfaem_mcr, (u2)u1s_emfng_MFMID, (u2)7U );
+    u2s_emfng_ecmfnh_mcr = u2g_glmulst_u2u2u2( (u2)u4t_eldmfaem_mcr, (u2)u1s_emfng_MFHI,  (u2)7U );
+                                                /* lsb=1 * (2/256) -> 1,unit=‰ñ */
+#endif
+
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_xottd_cal( )                               */
+/*  ˆ—“à—e      | ±²ÄŞÙ‘ÎŒü‹C“›¸‰Îê—p                          */
+/*                | G”}OTÚÍŞÙˆÙíŒŸo‰¼‹L‰¯Ì×¸Ş‚Ì‘€ì               */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| 65ms(emfng_65msl()‚©‚çƒR[ƒ‹)                    */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      | “à•”ŠÖ”                                         */
+/*********************************************************************/
+static void
+emfng_xottd_cal( void )
+{
+    s4 s4t_i;           /* lsb=1 :forƒ‹[ƒv•Ï” */
+    u1 u1t_ncyl_c;      /* lsb=1 :‹C“›” */
+#if JENCYL == u1g_EJCC_6CYL    /*y6‹C“›z*/
+    s4 s4t_cnt;         /* lsb=1 :¸‰Î‹C“›”¶³İÀ */
+    u1 u1t_ncylw_c;     /* lsb=1 :‹C“›ŒQ” */
+#endif
+    s4 s4t_mfci;        /* lsb=1 :ecdmfemi[] >= emfng_MFSTEMI¬—§‰ñ”¶³İÀ */
+    s4 s4t_mfrtot;      /* lsb=256/128/256,unit=% :emfrtotsum/ecmfotcnt */
+    s4 s4t_cdmfaot;     /* lsb=1,unit=‰ñ :G”}OTƒŒƒxƒ‹‘S‹C“›¸‰ÎƒJƒEƒ“ƒ^ */
+    s4 s4t_cdmfaotbnk[2];  /* lsb=1,unit=‰ñ :ƒoƒ“ƒN•ÊG”}OTƒŒƒxƒ‹¸‰ÎƒJƒEƒ“ƒ^ */
+#if JENCYL == u1g_EJCC_6CYL    /*y6‹C“›z*/
+    s4 s4t_cdmfw;       /* lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î¶³İÀ */
+    u1 u1t_excdmfwtmp;  /* lsb=1 :‚¢‚¸‚ê‚©‚Ì‹C“›ŒQ•Ê‘ÎŒü¸‰Î¶³İÀ‚É‚æ‚èG”}OT”»’è */
+    u1 u1t_ekldmfw1_mcr; /* lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î‰ñ””»’è‰ºŒÀ’l(ŒvZ’l) */
+#endif
+    u1 u1t_xcdmfaot;    /* lsb=1 :G”}OT¸‰Î¶³İÀ‚É‚æ‚éG”}OT”»’è¬—§Ì×¸Ş */
+    u1 u1t_excdmfw;     /* lsb=1 :‘ÎŒü‹C“›¸‰Î”»’è¬—§Ì×¸Ş */
+    u1 u1t_exottd;      /* lsb=1 :G”}OTÚÍŞÙˆÙíŒŸo‰¼‹L‰¯Ì×¸Ş */
+    u1 u1t_xdtmf2;      /* lsb=1 :G”}OT”»’è—pˆ«˜H¶³İÀ’l”»’è */
+    s4 s4t_cdtmf2;      /* lsb=1,unit=‰ñ :G”}OTÚÍŞÙ”»’è—pˆ«˜H¶³İÀ */
+    s4 s4t_kcdmfaotb;   /* :ecdtmf2 – emfng_KCDTMFAOTB */
+    s4 s4t_cdmfaotb;    /* lsb=1,unit=‰ñ :ecdmfaot-ecdtmf2‚Ìƒ‰ƒbƒ`(MODE06—p) */
+    s4 s4t_emfrtotsum;  /* lsb=256/128/256,unit=% :ÏZ¸‰Î”»’è’l */
+    u2 u2t_ecmfotcnt;   /* lsb=1,unit=‰ñ :•½‹ÏZo—pÏZ‰ñ” */
+    s4 s4t_ekldmfot;    /* lsb=1,unit=‰ñ :G”}OTÚÍŞÙ¸‰Î‰ñ””»’è’l */
+#if JENCYL == u1g_EJCC_6CYL    /*y6‹C“›z*/
+    u1 u1t_ecdmfw[u1g_EJCC_NCYL/2]; /* lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î¶³İÀ */
+#endif
+    u2 u2t_ecjmfot;     /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev :G”}OTÚÍŞÙ¸‰ÎŒŸo‹–‰Â¶³İÀ */
+    u1 u1t_MFSTEMI_c;   /* lsb=1,unit=‰ñ :ƒAƒCƒhƒ‹’†‹C“›•Ê¸‰Î‰ñ””»’è’l */
+    u2 u2t_LJMFOT_c;    /* lsb=2/u1g_EJCC_NCYL,unit=rev :G”}OTƒŒƒxƒ‹ˆÙí”»’èÀsƒ^ƒCƒ~ƒ“ƒO */
+    u2 u2t_LJMFEM_c;    /* lsb=2/u1g_EJCC_NCYL,unit=rev :EMˆ«‰»ƒŒƒxƒ‹ˆÙí”»’èÀsƒ^ƒCƒ~ƒ“ƒO */
+    u2 u2t_LJMFOTF_c;   /* lsb=2/u1g_EJCC_NCYL,unit=rev :G”}OTƒŒƒxƒ‹ˆÙí”»’èÀsƒ^ƒCƒ~ƒ“ƒO */
+
+    /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+    u1t_exottd = (u1)bis_emfng_exottd;
+#if JENCYL == u1g_EJCC_6CYL    /*y6‹C“›z*/
+    u1t_ekldmfw1_mcr = u1s_emfng_ekldmfw1_mcr;
+#endif
+    u2t_ecjmfot   = u2g_emfng_ecjmfot;
+    u2t_LJMFOT_c = u2g_emfng_LJMFOT;
+    u2t_LJMFEM_c = u2g_emfng_LJMFEM;
+    u2t_LJMFOTF_c = u2s_emfng_LJMFOTF;
+    u1t_ncyl_c = u1g_ejcc_NCYL;
+
+    if ( u2g_emfng_ecjmfoti >= u2s_emfng_LJMFOTI )  /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev */
+    {
+        /**************************************/
+        /* G”}OTÚÍŞÙˆÙíŒŸo‰¼‹L‰¯Ì×¸Ş‚Ì‘€ì */
+        /**************************************/
+        u1t_MFSTEMI_c = u1s_emfng_MFSTEMI;
+        s4t_mfci = (s4)0;
+        for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncyl_c; s4t_i++ )
+        {
+            if ( u1g_emfng_ecdmfemi[s4t_i] >= u1t_MFSTEMI_c )
+            {
+                s4t_mfci++;
+            }
+        }
+
+        u1t_exottd = (u1)OFF;
+        if ( ( u2g_emfng_ecdmfaoti <= (u2)u1s_EMFNG_MFSTOTI )
+          && ( s4t_mfci == (s4)2 ) )
+        {
+            u1t_exottd = (u1)ON;
+        }
+        emfng_cdmfi_reset(); /* G”}OTÚÍŞÙ±²ÄŞÙ¸‰ÎŒŸo‹–‰Â¶³İÀ‚Ì¸Ø± */
+    }
+
+    /* G”}OTÚÍŞÙˆÙíŒŸoÀ²Ğİ¸Ş */
+    if ( ( u2t_ecjmfot >= u2t_LJMFOT_c )      /* lsb=1/3y6‹C“›z1/2y4‹C“›z,unit=rev */
+      || ( ( u2g_emfng_ecjmfem >= u2t_LJMFEM_c )
+        && ( u2t_ecjmfot >= u2t_LJMFOTF_c ) ) )
+    {
+        s4t_cdtmf2 = (s4)u1g_emfng_ecdtmf2;  /* –‘O€”õ */
+        u1t_xdtmf2 = (u1)OFF;
+        if ( s4t_cdtmf2 >= (s4)u1s_emfng_CDTMF2 )
+        {
+            u1t_xdtmf2 = (u1)ON;
+        }
+
+        /*********************************/
+        /* ¸‰Î‰ñ”CDMFAOT‚É‚æ‚éğŒ”»’è */
+        /*********************************/
+        s4t_cdmfaot       = (s4)u1g_emfng_ecdmfaot;           /* QÆ—p */
+        s4t_cdmfaotbnk[0] = (s4)u1g_emfng_ecdmfaotbnk[0];     /* QÆ—p */
+        s4t_cdmfaotbnk[1] = (s4)u1g_emfng_ecdmfaotbnk[1];     /* QÆ—p */
+
+        s4t_cdmfaotb = s4t_cdmfaot;
+
+        if ( u1t_xdtmf2 == (u1)ON )
+        {
+            s4t_kcdmfaotb = s4g_glmulstngrd_s2s2u2( (s2)s4t_cdtmf2, (s2)u1s_emfng_KCDTMFAOTB, (u2)5U );          /* lsb=1*8/256 -> 1(‰ñ) */
+
+            s4t_cdmfaot -= s4t_kcdmfaotb;
+            s4t_cdmfaotb = s4t_cdmfaot;            /* MODE06Zo—p‚É‰ºŒÀƒK[ƒh‘O‚Éƒ‰ƒbƒ` */
+
+            s4t_cdmfaotbnk[0] -= s4t_kcdmfaotb;
+            s4t_cdmfaotbnk[1] -= s4t_kcdmfaotb;
+            if ( s4t_cdmfaot < (s4)0 )        /* ‰ºŒÀƒK[ƒh */
+            {
+                s4t_cdmfaot = (s4)0;
+            }
+            if ( s4t_cdmfaotbnk[0] < (s4)0 )  /* ‰ºŒÀƒK[ƒh */
+            {
+                s4t_cdmfaotbnk[0] = (s4)0;
+            }
+            if ( s4t_cdmfaotbnk[1] < (s4)0 )  /* ‰ºŒÀƒK[ƒh */
+            {
+                s4t_cdmfaotbnk[1] = (s4)0;
+            }
+        }
+        s2s_emfng_ecdmfaotb = (s2)s4t_cdmfaotb;  /* (u1 - u1 * KCDTMFAOTB)‚Ì‚½‚ßƒK[ƒhˆ—•s—v */
+
+        glint_di(); /* ¥¥¥ Š„‚è‚İ‹Ö~ ¥¥¥ */
+        s4t_emfrtotsum = s4s_emfng_emfrtotsum;
+        u2t_ecmfotcnt  = u2s_emfng_ecmfotcnt;
+        glint_ei(); /* £££ Š„‚è‚İ‹–‰Â £££ */
+
+        s4t_mfrtot = s4g_gldiv_s4s4( s4t_emfrtotsum, (s4)u2t_ecmfotcnt );
+                                                        /* lsb=(256/128/256)/1 -> 256/128/256,unit=% */
+        ELIB_LOWGD2( s4t_mfrtot, (s4)s2g_emfng_MFOTL, s4t_mfrtot );
+        s4t_ekldmfot = s4g_glmulst_s4s4u2( (s4)u2g_emfng_ekldmfoth_mcr, s4t_mfrtot, (u2)0U );
+                                                        /* lsb=1*(256/128/256) -> 256/128/256,unit=% */
+        s4t_ekldmfot = s4g_gldiv_s4s4( s4t_ekldmfot, (s4)(((100.)/(256./128./256.))+0.5) );
+                                                        /* lsb=(256/128/256)/(256/128/256) -> 1,unit=‰ñ */
+        ELIB_HILOGD2( s4t_ekldmfot, (s4)u2g_U2MAX, (s4)u2g_U2MIN, s4t_ekldmfot );
+        u2g_emfng_ekldmfot = (u2)s4t_ekldmfot;
+
+        u1t_xcdmfaot = (u1)OFF;
+        if ( u1g_emfng_CATN == (u1)1U )         /* ƒoƒ“ƒN‹æ•Ê‚È‚µ */
+        {
+            if ( s4t_cdmfaot >= s4t_ekldmfot )
+            {
+                u1t_xcdmfaot = (u1)ON;
+            }
+        }
+        else                                    /* ƒoƒ“ƒN‹æ•Ê‚ ‚è */
+        {
+            if ( ( s4t_cdmfaotbnk[0] >= s4t_ekldmfot )
+              || ( s4t_cdmfaotbnk[1] >= s4t_ekldmfot ) )
+            {
+                u1t_xcdmfaot = (u1)ON;
+            }
+        }
+
+        /* RAMƒf[ƒ^‚ÉŠi”[ */
+        glbitcp_bibi( u1t_xcdmfaot, bis_emfng_excdmfaot );
+
+        /**********************************/
+        /* ‘ÎŒü‹C“›¸‰Î”»’è¬—§Ì×¸Ş‚Ì‘€ì */
+        /**********************************/
+        u1t_excdmfw = (u1)OFF;                  /*y4‹C“›z‚ÍOFFŒÅ’è(‘ÎŒü‹C“›¸‰ÎŒŸo‚È‚µ) */
+#if JENCYL == u1g_EJCC_6CYL    /*y6‹C“›z*/
+        u1t_excdmfwtmp = (u1)OFF;
+        u1t_ncylw_c = u1s_EMFNG_NCYLW;
+        for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncylw_c; s4t_i++ )
+        {
+            u1t_ecdmfw[s4t_i] = u1g_emfng_ecdmfw[s4t_i];
+            if ( u1t_ecdmfw[s4t_i] > u1t_ekldmfw1_mcr )
+            {
+                u1t_excdmfwtmp = (u1)ON;
+            }
+        }
+        s4t_cdmfw = (s4)u1t_ecdmfw[0];               /* [0]‚ğ‘ã“ü */
+        for ( s4t_i = (s4)1; s4t_i < (s4)u1t_ncylw_c; s4t_i++ )
+        {
+            s4t_cdmfw += (s4)u1t_ecdmfw[s4t_i];      /* [1]`‰ÁZ */
+        }
+        if ( ( ( s4t_cdmfw <= (s4)u1s_emfng_ekldmfw2_mcr )
+            && ( s4t_cdmfw >  (s4)u1t_ekldmfw1_mcr ) )
+          && ( u1t_excdmfwtmp == (u1)ON ) )
+        {
+            u1t_excdmfw = (u1)ON;                /* CXMF1²İ¸ØÒİÄğŒ */
+        }
+#endif
+        /* RAMƒf[ƒ^‚ÉŠi”[ */
+        glbitcp_bibi( u1t_excdmfw, big_emfng_excdmfw );
+
+        /**************************************/
+        /* G”}OTÚÍŞÙˆÙíŒŸo‰¼‹L‰¯Ì×¸Ş‚Ì‘€ì */
+        /**************************************/
+#if JENCYL == u1g_EJCC_6CYL    /*y6‹C“›z*/
+        s4t_cnt = (s4)0;
+        for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncyl_c; s4t_i++ )
+        {
+            if ( u1g_emfng_ecdmfem[s4t_i] >= u1s_emfng_MFSTOT )
+            {
+                s4t_cnt++;                       /* ¸‰Î‹C“›”‚ÌƒJƒEƒ“ƒg */
+            }
+        }
+
+        /* ƒZƒbƒgğŒ”»’è a */
+        if ( ( u1t_xcdmfaot == (u1)ON )
+          && ( s4t_cdmfaot <= (s4)204 )
+          && ( s4t_cnt == (s4)2 )
+          && ( bis_emfng_exmfkpl == (u1)ON ) )
+        {
+            u1t_exottd = (u1)ON;
+        }
+#endif
+
+        /* ƒZƒbƒgğŒ”»’è b */
+        if ( ( u1t_excdmfw == (u1)ON )           /*y4‹C“›z‚ÍOFFŒÅ’è */
+          && ( bis_emfng_exmfkpm == (u1)ON ) )
+        {
+            u1t_exottd = (u1)ON;
+        }
+    }   /* G”}OTÚÍŞÙˆÙíŒŸoÀ²Ğİ¸Ş end */
+
+    /* RAMƒf[ƒ^‚ÉŠi”[ */
+    glbitcp_bibi( u1t_exottd, bis_emfng_exottd );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_cdmfi_reset( )                             */
+/*  ˆ—“à—e      | ¸‰Î‰ñ””»’è¶³İÀ(±²ÄŞÙ—p)‚Ì¸Ø±ˆ—               */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      | “à•”ŠÖ”                                         */
+/*                | Š„‚İŠ±Â‚Ìl—¶•K—v                             */
+/*********************************************************************/
+static void
+emfng_cdmfi_reset( void )
+{
+    s4 s4t_i;
+    u1 u1t_ncyl_c;                   /* lsb=1 :‹C“›” */
+
+    /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+    u1t_ncyl_c = u1g_ejcc_NCYL;
+
+    glint_di(); /* ¥¥¥ Š„‚è‚İ‹Ö~ ¥¥¥ */
+    u2g_emfng_ecjmfoti  = (u2)0U;
+    u2g_emfng_ecdmfaoti = (u2)0U;
+    for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncyl_c; s4t_i++ )
+    {
+        u1g_emfng_ecdmfemi[s4t_i] = (u1)0U;
+    }
+    glint_ei(); /* £££ Š„‚è‚İ‹–‰Â £££ */
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_ot_detect_ptptptpt( )                      */
+/*  ˆ—“à—e      | G”}OTƒŒƒxƒ‹ˆÙí”»’è                             */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| 65ms–ˆ(emfng_65msl()‚æ‚èƒR[ƒ‹)                  */
+/*  ˆø”          | ptt_xumfot : G”}OTÚÍŞÙ‚Ì³í”»’è•Û—¯Ì×¸Ş‚ÌŠi”[æ */
+/*                | ptt_xdmfot : G”}OTÚÍŞÙˆÙí”»’èÌ×¸Ş‚ÌŠi”[æ      */
+/*                | ptt_xhmfoton  : G”}OT‚É‚æ‚éMIL“_–Å—v‹Ì×¸Ş‚ÌŠi”[æ */
+/*                | ptt_xhmfotoff : G”}OT‚É‚æ‚éMIL“_–Å·¬İ¾Ù—v‹Ì×¸Ş‚ÌŠi”[æ */
+/*  –ß‚è’l        | ‚È‚µ(ˆø”‚Åó‚¯“n‚µ)                             */
+/*  ’ˆÓ–€      | “à•”ŠÖ”                                         */
+/*********************************************************************/
+static void
+emfng_ot_detect_ptptptpt( u1 *ptt_xumfot, u1 *ptt_xdmfot, u1 *ptt_xhmfoton, u1 *ptt_xhmfotoff )
+{
+    s4 s4t_ecxmf1;      /* lsb=1,unit=‰ñ:G”}OTÚÍŞÙˆÙíŒŸo‰ñ” */
+    s4 s4t_exmfotfc1;   /* lsb=1:emfng_exmfotfc_u1()ƒR[ƒ‹ğŒ‚P”»’è */
+#if JEMFFC == u1g_EJCC_USE  /*yG”}OT¸‰ÎˆÙíFC—Lz*/
+    s4 s4t_exmfotfc2;   /* lsb=1:emfng_exmfotfc_u1()ƒR[ƒ‹ğŒ‚Q”»’è */
+#endif
+    s4 s4t_xecxmf1inc;  /* lsb=1:ecxmfc1¶³İÄ±¯ÌßğŒ¬—§Ì×¸Ş */
+    s4 s4t_xjdge;       /* lsb=1:G”}OTÚÍŞÙˆÙíğŒ‚Q¬—§Ì×¸Ş */
+    u1 u1t_xdmfot;      /* lsb=1:G”}OTÚÍŞÙˆÙí¬—§Ì×¸Ş */
+    u1 u1t_xumfot;      /* lsb=1:G”}OTÚÍŞÙ³í”»’è•Û—¯Ì×¸Ş */
+    u1 u1t_xhmfoton;    /* lsb=1:MIL“_–Å—v‹Ì×¸Ş */
+    u1 u1t_xhmfotoff;   /* lsb=1:MIL“_–Å·¬İ¾ÙÌ×¸Ş */
+    u1 u1t_exottd;      /* lsb=1:G”}OTÚÍŞÙˆÙíŒŸo‰¼‹L‰¯Ì×¸Ş */
+    u1 u1t_CXMF1L_c;    /* lsb=1,unit=‰ñ :G”}OTƒŒƒxƒ‹ˆÙíŒŸo‰ñ””»’è’l */
+    u1 u1t_exinftp;     /* lsb=1:ƒ‚[ƒh‘–s”»’èƒtƒ‰ƒO */
+    u1 u1t_state;       /* lsb=1 :ŒŸoŠ´“xó‘Ô */
+#if JETCORE_D == u1g_EJCC_USE  /*yt-CORE‘Î‰—Lz*/
+    u1 u1t_xoutftp;     /* lsb=1:OT¸‰Îƒ‚[ƒh—ÌˆæŠO”»’èÌ×¸Ş */
+#endif
+#if JEMFDTC_D == u1g_EJCC_USE  /*y¸‰ÎOBD DTC—Lz*/
+    u1 u1t_xem_lstpnd;  /* lsb=1 :‘OÄŞ×²ËŞİ¸Ş»²¸Ù‰¼ˆÙíó‘Ô(EM)(ƒ‰ƒbƒ`—p) */
+    u1 u1t_xot_lstpnd;  /* lsb=1 :‘OÄŞ×²ËŞİ¸Ş»²¸Ù‰¼ˆÙíó‘Ô(OT)(ƒ‰ƒbƒ`—p) */
+#endif
+
+    /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+    s4t_ecxmf1     = (s4)u1s_emfng_ecxmf1;
+    u1t_xdmfot     = (u1)OFF;
+    s4t_xecxmf1inc = (s4)OFF;
+    s4t_xjdge      = (s4)OFF;
+    s4t_exmfotfc1  = (s4)OFF;
+#if JEMFFC == u1g_EJCC_USE  /*yG”}OT¸‰ÎˆÙíFC—Lz*/
+    s4t_exmfotfc2  = (s4)OFF;
+#endif
+    u1t_xumfot     = (u1)OFF;
+    u1t_xhmfoton   = (u1)OFF;
+    u1t_xhmfotoff  = (u1)OFF;
+    u1t_exottd     = (u1)bis_emfng_exottd;
+    u1t_CXMF1L_c = u1s_emfng_CXMF1L;
+    u1t_exinftp    = (u1)big_emfinftp_exinftp;
+    u1t_state = u1s_emfng_state_Lch;
+#if JETCORE_D == u1g_EJCC_USE  /*yt-CORE‘Î‰—Lz*/
+    u1t_xoutftp    = (u1)OFF;
+#endif
+#if JEMFDTC_D == u1g_EJCC_USE  /*y¸‰ÎOBD DTC—Lz*/
+    u1t_xem_lstpnd = u1s_emfng_xem_lstpnd_Lch;
+    u1t_xot_lstpnd = u1s_emfng_xot_lstpnd_Lch;
+#endif
+
+    /********************************/
+    /* G”}OTÚÍŞÙˆÙíŒŸo‰ñ”‚ÌZo */
+    /********************************/
+    if ( ( bis_emfng_excdmfaot == (u1)ON )
+#if JENCYL == u1g_EJCC_6CYL /*y6‹C“›z*/
+      || ( big_emfng_excdmfw    == (u1)ON )
+#endif
+       )
+    {
+        s4t_exmfotfc1 = (s4)ON;
+    }
+
+    if ( ( s4t_exmfotfc1 == (s4)ON )
+      || ( u1t_exottd  == (u1)ON ) )
+    {
+        s4t_xecxmf1inc = (s4)ON;
+        u1t_xumfot = (u1)ON;                    /* G”}OTÚÍŞÙ³í”»’è•Û—¯ */
+        if ( s4t_ecxmf1 < (s4)u1g_U1MAX )
+        {
+            s4t_ecxmf1++;
+        }
+    }
+
+    /************************/
+    /* G”}OTÚÍŞÙˆÙí‚Ì”»’è */
+    /************************/
+    if ( ( s4t_ecxmf1   >= (s4)u1s_emfng_CXMF1H )
+      || ( ( s4t_ecxmf1 >= (s4)u1t_CXMF1L_c )
+        && ( ( u1t_exinftp == (u1)OFF )
+          || ( u1t_state == u1g_WSENTIVCHG_LVL2 )
+#if JEMFDTC_D == u1g_EJCC_USE  /*y¸‰ÎOBD DTC—Lz*/
+          || ( u1t_xem_lstpnd == (u1)ON )
+          || ( u1t_xot_lstpnd == (u1)ON )
+#endif
+           ) ) )
+    {
+#if JEMFFC == u1g_EJCC_USE  /*yG”}OT¸‰ÎˆÙíFC—Lz*/
+        s4t_exmfotfc2 = (s4)ON;
+#endif
+        s4t_xjdge = (s4)ON;
+    }
+
+#if ( JENCYL == u1g_EJCC_4CYL ) && ( JEMFHOUKI == u1g_EJCC_NOT_USAMF )  /*y4‹C“›zANDy‘Î•Ä–@‹KˆÈŠOz */
+    if ( ( s4t_ecxmf1 >= (s4)u1t_CXMF1L_c )
+      && ( u1t_exottd  == (u1)ON ) )
+    {
+        s4t_xjdge = (s4)ON;
+    }
+#endif
+
+    /* 2-1.(2)‡@(c)²)îğ)ğŒ•ÏX‚ÍA‰º‹LğŒ®‚àŒ©’¼‚·– */
+#if JETCORE_D == u1g_EJCC_USE      /*yt-CORE‘Î‰—Lz*/
+    if ( ( u1t_exinftp == (u1)OFF )
+      || ( u1t_state == u1g_WSENTIVCHG_LVL2 )
+ #if JEMFDTC_D == u1g_EJCC_USE     /*y¸‰ÎOBD DTC—Lz*/
+      || ( u1t_xem_lstpnd == (u1)ON )
+      || ( u1t_xot_lstpnd == (u1)ON )
+ #endif
+ #if ( JENCYL == u1g_EJCC_4CYL ) && ( JEMFHOUKI == u1g_EJCC_NOT_USAMF ) /*y4‹C“›zANDy‘Î•Ä–@‹KˆÈŠOz*/
+      || ( u1t_exottd  == (u1)ON )
+ #endif
+       )
+    {
+        u1t_xoutftp = (u1)ON;        /* OT¸‰Îƒ‚[ƒh—ÌˆæŠO‚Æ”»’è */
+    }
+    /* RAMƒf[ƒ^‚ÉŠi”[ */
+    glbitcp_bibi( u1t_xoutftp, bis_emfng_exoutftp );         /* OT¸‰Îƒ‚[ƒh—ÌˆæŠO”»’èÌ×¸Ş(65msl) */
+#endif
+
+    if ( s4t_xecxmf1inc == (s4)ON )  /* ecxmf1¶³İÄ±¯ÌßğŒ¬—§ */
+    {
+        if ( s4t_xjdge == (s4)ON )
+        {
+            u1t_xdmfot       = (u1)ON;                /* G”}OTÚÍŞÙŒ»İˆÙí */
+            bis_emfng_exdmf1 = (u1)ON;
+        }
+        if ( ( bis_emfng_exdmf1 == (u1)ON )
+#if JEMFDTC_D == u1g_EJCC_USE /*y¸‰ÎOBD DTC—Lz*/
+          || ( ( u1s_emfng_xot_warning_Lch == (u1)ON )
+            || ( u1s_emfng_xem_warning_Lch == (u1)ON ) )
+#endif
+#if JEMFFC == u1g_EJCC_USE  /*yG”}OT¸‰ÎˆÙíFC—Lz*/
+          || ( u1g_emffc_exfcbi != (u1)0x00U )  /* G”}OT¸‰Î–h~FC—v‹—L‚è */
+#endif
+           )
+        {
+            u1t_xhmfoton = (u1)ON;              /* MIL“_–Å */
+        }
+        else
+        {
+            u1t_xhmfotoff = (u1)ON;             /* MIL“_–Å·¬İ¾Ù */
+        }
+    }
+    else
+    {
+        if ( ( u1g_emfng_ecdtmf2 < u1s_emfng_CDTMF2 )
+#if JEMFFC == u1g_EJCC_USE  /*yG”}OT¸‰ÎˆÙíFC—Lz*/
+          && ( u1g_emffc_exfcbi == (u1)0x00U )  /* G”}OT¸‰Î–h~FC—v‹–³‚µ */
+#endif
+           )
+        {
+            u1t_xhmfotoff = (u1)ON;             /* MIL“_–Å·¬İ¾Ù */
+        }
+    }
+
+    /* RAMƒf[ƒ^‚ÉŠi”[ */
+    u1s_emfng_ecxmf1 = (u1)s4t_ecxmf1;
+
+#if JEMFFC == u1g_EJCC_USE          /*yG”}OT¸‰ÎˆÙíFC—Lz*/
+    /* emfng_exmfotfc()‚ÌƒR[ƒ‹ */
+    if ( ( s4t_exmfotfc1 == (s4)ON )
+      && ( s4t_exmfotfc2 == (s4)ON ) )
+    {
+        emfng_exmfotfc_u1( (u1)ON );
+    }
+#endif
+
+    /* –ß‚è’l‚Ìİ’è */
+    *ptt_xumfot    = u1t_xumfot;
+    *ptt_xdmfot    = u1t_xdmfot;
+    *ptt_xhmfoton  = u1t_xhmfoton;
+    *ptt_xhmfotoff = u1t_xhmfotoff;
+}
+
+/***********************************************************************/
+/*  ŠÖ”–¼        | emfng_em_detect_u2ptpt( )                          */
+/*  ˆ—“à—e      | EMˆ«‰»ƒŒƒxƒ‹ˆÙí”»’è                               */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| 65ms–ˆ(emfng_65msl()‚æ‚èƒR[ƒ‹)                    */
+/*  ˆø”          | u2t_cdmfae2  : EMˆ«‰»ƒŒƒxƒ‹ˆÙí”»’è’l              */
+/*                | ptt_xdmfem   : EMˆ«‰»ÚÍŞÙˆÙí”»’èÌ×¸Ş‚ÌŠi”[æ      */
+/*                | ptt_xumfem   : EMˆ«‰»ÚÍŞÙ³í”»’è•Û—¯Ì×¸Ş‚ÌŠi”[æ  */
+/*  –ß‚è’l        | ‚È‚µ(ˆø”‚Åó‚¯“n‚µ)                               */
+/*  ’ˆÓ–€      | “à•”ŠÖ”                                           */
+/***********************************************************************/
+static void
+emfng_em_detect_u2ptpt( u2 u2t_cdmfae2, u1 *ptt_xdmfem, u1 *ptt_xumfem )
+{
+    s4 s4t_ecxmf;       /* lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙˆÙíŒŸo‰ñ” */
+    u1 u1t_xdmfem;      /* lsb=1 :EMˆ«‰»ÚÍŞÙˆÙí”»’èÌ×¸Ş */
+    u2 u2t_kldmfae;     /* lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ¸‰Î”»’è’l */
+    u1 u1t_xumfem;      /* lsb=1 :EMˆ«‰»ÚÍŞÙ³í”»’è•Û—¯Ì×¸Ş */
+    u1 u1t_state;       /* lsb=1 :ŒŸoŠ´“xó‘Ô */
+    u1 u1t_CXMFL_c;     /* lsb=1,unit=‰ñ :EMˆ«‰»ƒŒƒxƒ‹ˆÙíŒŸo‰ñ””»’è’l */
+#if JETCORE_D == u1g_EJCC_USE                      /*yt-CORE‘Î‰—Lz*/
+    u1 u1t_xemfst;      /* lsb=1 :EMˆ«‰»ƒŒƒxƒ‹‰‰ñ1000rev”»’èÌ×¸Ş */
+#endif
+#if JEMFHOUKI == u1g_EJCC_USAMF                    /*y‘Î•Ä–@‹Kz*/
+    u2 u2t_ecdmfae2;    /* lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ‘S‹C“›¸‰Î¶³İÀ */
+    u1 u1t_exjokmf;     /* lsb=1 :n“®Œã1000revŠ®—¹Ì×¸Ş */
+#endif
+
+    /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+    s4t_ecxmf   = (s4)u1s_emfng_ecxmf;
+    u1t_xdmfem  = *ptt_xdmfem;
+    u1t_xumfem  = *ptt_xumfem;
+    u2t_kldmfae = u2g_emfng_ekldmfae;
+    u1t_state   = u1s_emfng_state_Lch;
+    u1t_CXMFL_c = u1s_emfng_CXMFL;
+#if JETCORE_D == u1g_EJCC_USE                      /*yt-CORE‘Î‰—Lz*/
+    u1t_xemfst  = (u1)OFF;
+#endif
+#if JEMFHOUKI == u1g_EJCC_USAMF                    /*y‘Î•Ä–@‹Kz*/
+    u2t_ecdmfae2 = u2g_emfng_ecdmfae2;
+    u1t_exjokmf  = (u1)big_emfng_exjokmf;
+#endif
+
+    /********************************/
+    /* EMˆ«‰»ÚÍŞÙˆÙíŒŸo‰ñ”‚ÌZo */
+    /********************************/
+    if ( u2t_cdmfae2 >= u2t_kldmfae )                      /* lsb=1,unit=‰ñ */
+    {
+        u1t_xumfem = (u1)ON;                       /* EMˆ«‰»ÚÍŞÙ³í”»’è•Û—¯ */
+        if ( s4t_ecxmf < (s4)u1g_U1MAX )
+        {
+            s4t_ecxmf++;
+        }
+
+        /************************/
+        /* EMˆ«‰»ÚÍŞÙˆÙí‚Ì”»’è */
+        /************************/
+        if ( ( s4t_ecxmf >= (s4)u1s_emfng_CXMFH )
+          || ( ( s4t_ecxmf >= (s4)u1t_CXMFL_c )
+            && ( ( u1t_state == u1g_WSENTIVCHG_LVL2 )
+              || ( u1t_state == u1g_WSENTIVCHG_IUE ) ) )     /* Š´“xƒAƒbƒvi•]‰¿—pj */
+#if JEMFHOUKI == u1g_EJCC_USAMF                     /*y‘Î•Ä–@‹Kz*/
+          || ( ( u2t_ecdmfae2 >= u2t_kldmfae )
+            && ( u1t_exjokmf == (u1)OFF ) )
+#endif
+           )
+        {
+            u1t_xdmfem = (u1)ON;                   /* EMˆ«‰»ÚÍŞÙŒ»İˆÙí */
+        }
+    }
+
+    /* 2-2.(2)‡@(c)²)‚à‚µ‚­‚Í³)ğŒ•ÏX‚ÍA‰º‹LğŒ®‚àŒ©’¼‚·– */
+#if JETCORE_D == u1g_EJCC_USE                        /*yt-CORE‘Î‰—Lz*/
+    if ( ( ( s4t_ecxmf >= (s4)u1t_CXMFL_c )
+      && ( ( u1t_state == u1g_WSENTIVCHG_LVL2 )
+        || ( u1t_state == u1g_WSENTIVCHG_IUE ) ) )   /* Š´“xƒAƒbƒvi•]‰¿—pj */
+ #if JEMFHOUKI == u1g_EJCC_USAMF                     /*y‘Î•Ä–@‹Kz*/
+      || ( ( u2t_ecdmfae2 >= u2t_kldmfae )
+        && ( u1t_exjokmf == (u1)OFF ) )
+ #endif
+       )
+    {
+        u1t_xemfst = (u1)ON;                         /* EMˆ«‰»ƒŒƒxƒ‹‰‰ñ1000rev‚Æ”»’è */
+    }
+    /* RAMƒf[ƒ^‚ÉŠi”[ */
+    glbitcp_bibi( u1t_xemfst, bis_emfng_exemfst );   /* EMˆ«‰»ƒŒƒxƒ‹‰‰ñ1000rev”»’èÌ×¸Ş(65msl) */
+#endif
+
+    /* RAMƒf[ƒ^‚ÉŠi”[ */
+    u1s_emfng_ecxmf = (u1)s4t_ecxmf;
+
+    /* –ß‚è’l‚Ìİ’è */
+    *ptt_xdmfem = u1t_xdmfem;
+    *ptt_xumfem = u1t_xumfem;
+}
+
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+/***********************************************************************/
+/*  ŠÖ”–¼        | emfng_di_detect_ptpt( )                            */
+/*  ˆ—“à—e      | DIˆÙíŒŸo                                         */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| 65ms–ˆ(emfng_65msl()‚æ‚èƒR[ƒ‹)                    */
+/*  ˆø”          | ptt_xdmfdi   : DIˆÙíÌ×¸Ş‚ÌŠi”[æ                  */
+/*                | ptt_xumfdi   : DIˆÙí‚É‚æ‚é³í”»’è•Û—¯Ì×¸Ş‚ÌŠi”[æ */
+/*  –ß‚è’l        | ‚È‚µ(ˆø”‚Åó‚¯“n‚µ)                               */
+/*  ’ˆÓ–€      | “à•”ŠÖ”                                           */
+/*                |yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz                   */
+/***********************************************************************/
+static void
+emfng_di_detect_ptpt( u1 *ptt_xdmfdi, u1 *ptt_xumfdi )
+{
+    u1 u1t_xddi;            /* lsb=1 : DIˆÙí”»’èÌ×¸Ş */
+    s4 s4t_cyl;             /* lsb=1,unit=‹C“› */
+    u1 u1t_xdmfdi;          /* lsb=1 : DIˆÙíÌ×¸Ş */
+    u1 u1t_xumfdi;          /* lsb=1 : DIˆÙí‚É‚æ‚é³í”»’è•Û—¯Ì×¸Ş */
+    u1 u1t_ncyl_c;          /* lsb=1 :‹C“›” */
+
+    /* ƒ[ƒN•Ï”‚Ì‰Šú‰» */
+    u1t_xdmfdi = (u1)OFF;
+    u1t_xumfdi = (u1)OFF;
+    u1t_ncyl_c = u1g_ejcc_NCYL;
+
+    u1t_xddi = (u1)OFF;
+    for ( s4t_cyl = (s4)0; s4t_cyl < (s4)u1t_ncyl_c ; s4t_cyl++ )
+    {
+        if ( u1s_emfng_ecdmfdi[s4t_cyl] >= u1s_emfng_MFDDI )
+        {
+            u1t_xddi = (u1)ON;
+            u1s_emfng_exdmfdim[s4t_cyl] = (u1)ON;
+        }
+    }
+
+    /********************/
+    /* DIˆÙí‚ÌŒŸo”»’è */
+    /********************/
+    if ( u1t_xddi == (u1)ON )
+    {
+        u1t_xdmfdi = (u1)ON;     /* DIˆÙíÌ×¸Ş¾¯Ä */
+        u1t_xumfdi = (u1)ON;     /* DIˆÙí‚É‚æ‚é³í”»’è•Û—¯Ì×¸Ş¾¯Ä */
+        big_emfng_exmfddi = (u1)ON;
+    }
+    bis_emfng_excdmfdiclr = (u1)ON;  /* exdmfdim¸Ø±—pÌ×¸Ş */
+    /* ŒŸo¶³İÀ‚Ì¸Ø± */
+    glint_di(); /* ¥¥¥ Š„‚è‚İ‹Ö~ ¥¥¥ */
+    u2s_emfng_ecjmfdi = (u2)0;       /* 0‰Šú‰»‚Ì‚½‚ßLSBÈ—ª */
+    /* DI¸‰ÎŒŸoI—¹Ì×¸Ş‚Ì¾¯Ä */
+    big_emfng_exmfdied = (u1)ON;
+    for ( s4t_cyl = (s4)0; s4t_cyl < (s4)u1t_ncyl_c ; s4t_cyl++ )
+    {
+        u1s_emfng_ecdmfdi[s4t_cyl] = (u1)(((0.)/(1.))+0.5);   /* ecjmfdi‚Æ“¯‚ÉƒNƒŠƒA‚·‚é */
+    }
+    glint_ei(); /* £££ Š„‚è‚İ‹–‰Â £££ */
+    *ptt_xdmfdi = u1t_xdmfdi;
+    *ptt_xumfdi = u1t_xumfdi;
+}
+
+/***********************************************************************/
+/*  ŠÖ”–¼        | emfng_pfi_detect_ptpt( )                           */
+/*  ˆ—“à—e      | PFIˆÙíŒŸo                                        */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| 65ms–ˆ(emfng_65msl()‚æ‚èƒR[ƒ‹)                    */
+/*  ˆø”          | ptt_xdmfpfi :PFIˆÙíÌ×¸Ş‚ÌŠi”[æ                   */
+/*                | ptt_xumfpfi :PFIˆÙí‚É‚æ‚é³í”»’è•Û—¯Ì×¸Ş‚ÌŠi”[æ */
+/*  –ß‚è’l        | ‚È‚µ(ˆø”‚Åó‚¯“n‚µ)                               */
+/*  ’ˆÓ–€      | “à•”ŠÖ”                                           */
+/*                |yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz                   */
+/***********************************************************************/
+static void
+emfng_pfi_detect_ptpt( u1 *ptt_xdmfpfi, u1 *ptt_xumfpfi )
+{
+    u1 u1t_xdpfi;           /* lsb=1 : PFIˆÙí”»’èÌ×¸Ş */
+    s4 s4t_cyl;             /* lsb=1,unit=‹C“› */
+    u1 u1t_xdmfpfi;         /* lsb=1 : PFIˆÙíÌ×¸Ş */
+    u1 u1t_xumfpfi;         /* lsb=1 : PFIˆÙí‚É‚æ‚é³í”»’è•Û—¯Ì×¸Ş */
+    u1 u1t_MFDPFI_c;        /* lsb=1,unit=‰ñ :PFIˆÙíŒŸo¸‰Î‰ñ” */
+    u1 u1t_ncyl_c;          /* lsb=1 :‹C“›” */
+
+    /* ƒ[ƒN•Ï”‚Ì‰Šú‰» */
+    u1t_xdmfpfi = (u1)OFF;
+    u1t_xumfpfi = (u1)OFF;
+    u1t_MFDPFI_c = u1s_emfng_MFDPFI;
+    u1t_ncyl_c = u1g_ejcc_NCYL;
+
+    u1t_xdpfi = (u1)OFF;
+    for ( s4t_cyl = (s4)0; s4t_cyl < (s4)u1t_ncyl_c; s4t_cyl++ )
+    {
+        if ( u1s_emfng_ecdmfpfi[s4t_cyl] >= u1t_MFDPFI_c )
+        {
+            u1t_xdpfi = (u1)ON;
+            u1s_emfng_exdmfpfim[s4t_cyl] = (u1)ON;
+        }
+    }
+
+    /*********************/
+    /* PFIˆÙí‚ÌŒŸo”»’è */
+    /*********************/
+    if ( u1t_xdpfi == (u1)ON )
+    {
+        u1t_xdmfpfi = (u1)ON;     /* PFIˆÙíÌ×¸Ş¾¯Ä */
+        u1t_xumfpfi = (u1)ON;     /* PFIˆÙí‚É‚æ‚é³í”»’è•Û—¯Ì×¸Ş¾¯Ä */
+        big_emfng_exmfdpfi = (u1)ON;
+    }
+    bis_emfng_excdmfpficlr = (u1)ON;  /* exdmfpfim¸Ø±—pÌ×¸Ş */
+    /* ŒŸo¶³İÀ‚Ì¸Ø± */
+    glint_di(); /* ¥¥¥ Š„‚è‚İ‹Ö~ ¥¥¥ */
+    u2s_emfng_ecjmfpfi = (u2)0;       /* 0‰Šú‰»‚Ì‚½‚ßLSBÈ—ª */
+    /* PFI¸‰ÎŒŸoI—¹Ì×¸Ş‚Ì¾¯Ä */
+    big_emfng_exmfpfied = (u1)ON;
+    for ( s4t_cyl = (s4)0; s4t_cyl < (s4)u1t_ncyl_c; s4t_cyl++ )
+    {
+        u1s_emfng_ecdmfpfi[s4t_cyl] = (u1)(((0.)/(1.))+0.5);  /* ecjmfpfi‚Æ“¯‚É¸Ø±‚·‚é */
+    }
+    glint_ei(); /* £££ Š„‚è‚İ‹–‰Â £££ */
+    *ptt_xdmfpfi = u1t_xdmfpfi;
+    *ptt_xumfpfi = u1t_xumfpfi;
+}
+#endif /* JEEFI,JEHIPFI_E */
+
+#if JEMFDTC_D == u1g_EJCC_USE /*y¸‰ÎOBD DTC—Lz*/
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_wxmf_out( )                                */
+/*  ˆ—“à—e      | “d‹Z‚Ö‚Ì’Ê’mˆ—                                 */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| 65ms–ˆ(emfng_65msl()‚æ‚èƒR[ƒ‹)                  */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      | “à•”ŠÖ”y¸‰ÎOBD DTC—Lz                        */
+/*                | G”}OTÚÍŞÙ,EMˆ«‰»ÚÍŞÙ,DI,PFIˆÙí”»’èŒã‚Écall‚·‚é */
+/*********************************************************************/
+static void
+emfng_wxmf_out( void )
+{
+    static volatile u1 u1s_emfng_emfk;       /* lsb=1 :DTCo—Í‹C“› */
+ #pragma ghs startdata
+ #if ( JENCYL == u1g_EJCC_4CYL )      /*y4‹C“›z*/
+    static volatile const u1 u1s_emfng_cylwtocyl_tbl[2] = /* :cylw ¨ cylw‚É‘Î‰‚·‚éÀ‹C“›ƒrƒbƒg—ñ •ÏŠ·ƒe[ƒuƒ‹ */
+    { (u1)0x06U, (u1)0x09U };                             /* 0,1 ¨ #2#3,#1#4 */
+ #endif
+ #if ( JENCYL == u1g_EJCC_6CYL )      /*y6‹C“›z*/
+  #if JEEGTYPE == u1g_EJCC_V6CYL       /*yV6z*/
+    static volatile const u1 u1s_emfng_cylwtocyl_tbl[3] = /* :cylw ¨ cylw‚É‘Î‰‚·‚éÀ‹C“›ƒrƒbƒg—ñ •ÏŠ·ƒe[ƒuƒ‹ */
+    { (u1)0x24U, (u1)0x09U, (u1)0x12U };                  /* 0,1,2 ¨ #3#6,#1#4,#2#5 */
+  #elif JEEGTYPE == u1g_EJCC_L6CYL     /*yL6z*/
+    static volatile const u1 u1s_emfng_cylwtocyl_tbl[3] = /* :cylw ¨ cylw‚É‘Î‰‚·‚éÀ‹C“›ƒrƒbƒg—ñ •ÏŠ·ƒe[ƒuƒ‹ */
+    { (u1)0x0cU, (u1)0x21U, (u1)0x12U };                  /* 0,1,2 ¨ #3#4,#1#6,#2#5 */
+  #endif
+ #endif
+ #pragma ghs enddata
+
+    u1 u1t_i;
+    s4 s4t_cnt;
+    u1 u1t_xemfk;                    /* lsb=1 : ‹C“›‚É‘Î‰‚·‚éÀ‹C“›ƒrƒbƒg */
+    u1 u1t_xemfkw;                   /* lsb=1 : ‹C“›ŒQ‚É‘Î‰‚·‚éÀ‹C“›ƒrƒbƒg(‘ÎŒü‹C“›—p) */
+    u1 u1t_xemfk_opps;               /* lsb=1 : ‹C“›ŒQ‚É‘Î‰‚·‚éÀ‹C“›ƒrƒbƒg(‘ÎŒü‹C“›—pƒ[ƒN•Ï”) */
+    u4 u4t_ecdmfem2mx;               /* lsb=1,unit=‰ñ : ecdmfem2[]Å‘å’l */
+    u4 u4t_ecdmfem2[u1g_EJCC_NCYL];  /* lsb=1,unit=‰ñ : EMˆ«‰»ÚÍŞÙ‹C“›•Ê¸‰Î¶³İÀ */
+    s4 s4t_ecdmfae2;                 /* lsb=1,unit=‰ñ : ‘¸‰Î‰ñ”~0.9 */
+    u1  u1t_xdmfot;                  /* lsb=1 :G”}OTÚÍŞÙˆÙí”»’èÌ×¸Ş */
+    u1  u1t_xumfot;                  /* lsb=1 :G”}OTÚÍŞÙ³í”»’è•Û—¯Ì×¸Ş */
+    u1  u1t_xhmfoton;                /* lsb=1 :G”}OT‚É‚æ‚éMIL“_–Å—v‹Ì×¸Ş */
+    u1  u1t_xhmfotoff;               /* lsb=1 :G”}OT‚É‚æ‚éMIL“_–Å·¬İ¾Ù—v‹Ì×¸Ş */
+    u1  u1t_xdmfem;                  /* lsb=1 :EMˆ«‰»ÚÍŞÙˆÙíŒŸoÌ×¸Ş */
+    u1  u1t_xumfem;                  /* lsb=1 :EMˆ«‰»ÚÍŞÙ³í”»’è•Û—¯Ì×¸Ş */
+ #if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+    u1  u1t_xdmfdi;                  /* lsb=1 :DIˆÙíÌ×¸Ş */
+    u1  u1t_xumfdi;                  /* lsb=1 :DIˆÙí‚É‚æ‚é³í”»’è•Û—¯Ì×¸Ş */
+    u1  u1t_xdmfpfi;                 /* lsb=1 :PFIˆÙíÌ×¸Ş */
+    u1  u1t_xumfpfi;                 /* lsb=1 :PFIˆÙí‚É‚æ‚é³í”»’è•Û—¯Ì×¸Ş */
+ #endif
+    u1  u1t_excdmfw;                 /* lsb=1:‘ÎŒü‹C“›¸‰Î”»’è¬—§Ì×¸Ş */
+ #if JETCORE_D == u1g_EJCC_USE       /*yt-CORE‘Î‰—Lz*/
+    u1  u1t_otcnd;                   /* lsb=1 :OT¸‰ÎğŒ¯•Êq */
+    u1  u1t_emcnd;                   /* lsb=1 :EM¸‰ÎğŒ¯•Êq */
+    u1  u1t_exdmf;                   /* lsb=1 :¸‰ÎOBDŒ»İˆÙíÌ×¸Ş */
+ #endif
+    u1 u1t_ncyl_c;                   /* lsb=1 :‹C“›” */
+    u1 u1t_ncylw_c;                  /* lsb=1 :‹C“›ŒQ” */
+
+    /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+    u1t_ncyl_c = u1g_ejcc_NCYL;
+    u1t_excdmfw = (u1)big_emfng_excdmfw;
+    u4t_ecdmfem2[0] = (u4)u2g_emfng_ecdmfem2[0];    /* •¡”‰ñQÆ‚Ì‚½‚ßƒ‰ƒbƒ` */
+
+    for ( u1t_i = (u1)1; u1t_i < u1t_ncyl_c; u1t_i++ )
+    {
+        u4t_ecdmfem2[u1t_i] = (u4)u2g_emfng_ecdmfem2[u1t_i];   /* •¡”‰ñQÆ‚Ì‚½‚ßƒ‰ƒbƒ` */
+    }
+
+    /* ƒf[ƒ^’læ“¾ */
+    u1t_xdmfot    = (u1)bis_emfng_exdmfot;         /* G”}OTÚÍŞÙˆÙí”»’èÌ×¸Ş */
+    u1t_xumfot    = (u1)bis_emfng_exumfot;         /* G”}OTÚÍŞÙ³í”»’è•Û—¯Ì×¸Ş */
+    u1t_xhmfoton  = (u1)bis_emfng_exhmfoton;       /* G”}OT‚É‚æ‚éMIL“_–Å—v‹Ì×¸Ş */
+    u1t_xhmfotoff = (u1)bis_emfng_exhmfotoff;      /* G”}OT‚É‚æ‚éMIL“_–Å·¬İ¾Ù—v‹Ì×¸Ş */
+    u1t_xdmfem    = (u1)bis_emfng_exdmfem;         /* EMˆ«‰»ÚÍŞÙˆÙíŒŸoÌ×¸Ş */
+    u1t_xumfem    = (u1)bis_emfng_exumfem;         /* EMˆ«‰»ÚÍŞÙ³í”»’è•Û—¯Ì×¸Ş */
+ #if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+    u1t_xdmfdi    = (u1)bis_emfng_exdmfdi;         /* DIˆÙíÌ×¸Ş */
+    u1t_xumfdi    = (u1)bis_emfng_exumfdi;         /* DIˆÙí‚É‚æ‚é³í”»’è•Û—¯Ì×¸Ş */
+    u1t_xdmfpfi   = (u1)bis_emfng_exdmfpfi;        /* PFIˆÙíÌ×¸Ş */
+    u1t_xumfpfi   = (u1)bis_emfng_exumfpfi;        /* PFIˆÙí‚É‚æ‚é³í”»’è•Û—¯Ì×¸Ş */
+ #endif
+ #if JETCORE_D == u1g_EJCC_USE                                      /*yt-CORE‘Î‰—Lz*/
+    u1t_exdmf     = (u1)big_emfng_exdmf;           /* ¸‰ÎOBDŒ»İˆÙíÌ×¸Ş */
+ #endif
+
+    /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+    u1t_xemfk = (u1)0x00U;
+
+    /*************************/
+    /* “d‹Z‚Ö‚ÌDTCo—Í‚Ì’Ê’m */
+    /*************************/
+
+ #if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+    /*******************/
+    /* PFIˆÙí‚Ìˆ— */
+    /*******************/
+    if ( u1t_xdmfpfi == (u1)ON )
+    {
+        /* PFIˆÙí‚ÌŠe‹C“›‚Ì¸‰Î—L–³”»’è */
+        for ( u1t_i = (u1)0; u1t_i < u1t_ncyl_c; u1t_i++ )
+        {
+            if ( u1s_emfng_exdmfpfim[u1t_i] == (u1)ON )
+            {
+                u1t_xemfk |= u1g_EMFCNT_CYL(u1t_i);
+            }
+        }
+    }
+    /******************/
+    /* DIˆÙí‚Ìˆ— */
+    /******************/
+    else if ( u1t_xdmfdi == (u1)ON )
+    {
+        /* DIˆÙí‚ÌŠe‹C“›‚Ì¸‰Î—L–³”»’è */
+        for ( u1t_i = (u1)0; u1t_i < u1t_ncyl_c; u1t_i++ )
+        {
+            if ( u1s_emfng_exdmfdim[u1t_i] == (u1)ON )
+            {
+                u1t_xemfk |= u1g_EMFCNT_CYL(u1t_i);
+            }
+        }
+    }
+    else
+ #endif
+    {
+        /******************************/
+        /* G”}OTÚÍŞÙˆÙíŒŸoA     */
+        /* EMˆ«‰»ÚÍŞÙˆÙíŒŸo‚Ìˆ— */
+        /******************************/
+        if ( ( u1t_xdmfem == (u1)ON )       /* EMˆ«‰»ÚÍŞÙˆÙí */
+          || ( u1t_xdmfot == (u1)ON ) )     /* G”}OTÚÍŞÙˆÙí */
+        {
+            /***************************/
+            /* ‘¸‰Î‰ñ”‚Ì 90% ‚ÌZo */
+            /***************************/
+            s4t_ecdmfae2 = (s4)u2g_emfng_ecdmfae2;
+            s4t_ecdmfae2 = s4g_glmulst_s4s4u2( s4t_ecdmfae2, (s4)(((0.9)/(1./128./256.))+0.5), (u2)15U );
+                                                            /* lsb= 1 * 1/128/256 -> 1(‰ñ) */
+
+            if ( u1t_excdmfw == (u1)OFF )             /* ‘ÎŒü‹C“›¸‰Î‚Å‚Í‚È‚¢ */
+            {
+                /* ‘ÎŒü‹C“›¸‰Î‚Íecdmfem2[],ecdmfae2‹¤‚ÉƒJƒEƒ“ƒgƒAƒbƒv‚³‚ê‚¸            */
+                /* 0(‰ñ)†0(‰ñ)*90%‚Æ‚È‚èAí¬—§‚µ‚Ä‚µ‚Ü‚¤‚½‚ß‘ÎŒü‹C“›‚Í”»’è‚ğ‚µ‚È‚¢ */
+
+                for ( u1t_i = (u1)0; u1t_i < u1t_ncyl_c; u1t_i++ )
+                {
+                    /****************************************************************/
+                    /* ‘¸‰Î‰ñ”‚Ì90%ˆÈã‚ª1‚Â‚Ì‹C“›‚ÉW’†‚µ‚Ä‚¢‚é ¨ P0301`P0308 */
+                    /****************************************************************/
+                    if ( (s4)u4t_ecdmfem2[u1t_i] >= s4t_ecdmfae2 )
+                    {
+                        u1t_xemfk |= u1g_EMFCNT_CYL(u1t_i);
+                    }
+                } /* Ù°Ìßend */
+            }
+
+            /***********************************************/
+            /* ‚P‚Â‚Ì‹C“›‚É¸‰ÎW’†‚µ‚Ä‚¢‚È‚¢ê‡ ¨ P0300 */
+            /***********************************************/
+            if ( u1t_xemfk == (u1)0x00U )
+            {
+                /***************************************/
+                /* ‹C“›•Ê¸‰Î‰ñ”‚ÌÅ‘å’l * 0.1 ‚ÌZo */
+                /***************************************/
+                u4t_ecdmfem2mx = u4t_ecdmfem2[0];
+                for ( u1t_i = (u1)1; u1t_i < u1t_ncyl_c; u1t_i++ )
+                {
+                    if ( u4t_ecdmfem2mx < u4t_ecdmfem2[u1t_i] )  /* Max’l‘I‘ğ */
+                    {
+                        u4t_ecdmfem2mx = u4t_ecdmfem2[u1t_i];
+                    }
+                }
+                u4t_ecdmfem2mx = (u4)u2g_glmulst_u2u2u2( (u2)u4t_ecdmfem2mx, (u2)(((0.1)/(1./128./256.))+0.5), (u2)15U );
+                                                                     /* lsb= 1 * 1/128/256 -> 1(‰ñ) */
+
+                /* ‹C“›•Ê¸‰Î‰ñ”‚ª Š’è’lˆÈã */
+                /* ˆê”Ô¸‰Î‰ñ”‚ª‘½‚¢‹C“›‚Ì¸‰Î‰ñ”~0.1 ‚ğ ã‰ñ‚é */
+                s4t_cnt   = (s4)0;
+                for ( u1t_i = (u1)0; u1t_i < u1t_ncyl_c; u1t_i++ )
+                {
+                    if ( ( u4t_ecdmfem2[u1t_i] >= (u4)u2s_emfng_emfk_mcr )   /* ”»’è(a) */
+                      && ( u4t_ecdmfem2[u1t_i] >= u4t_ecdmfem2mx ) )
+                    {
+                        u1t_xemfk |= u1g_EMFCNT_CYL(u1t_i);
+                        s4t_cnt++;
+                    }
+                } /* Ù°Ìßend */
+
+                if ( ( s4t_cnt == (s4)1 )              /* 1‹C“›‚µ‚©ã‹LğŒ‚ª¬—§‚µ‚È‚©‚Á‚½B                  */
+                  && ( u1t_excdmfw == (u1)OFF ) )      /* ‚©‚ÂA‘ÎŒü‹C“›¸‰Î‚Å‚Í‚È‚¢(4‹C“›‚ÍíOFF‚Ì‚½‚ß¬—§) */
+                {
+                    u1t_xemfk = (u1)0x00U;      /* u1t_xemfk‚É’l‚ªc‚Á‚Ä‚¢‚é‚ÆP0301`P0308 ‚ªƒZƒbƒg‚³‚ê‚é‚Ì‚ÅƒNƒŠƒA */
+                }
+            }   /* ‘¸‰Î‰ñ”‚Ì90%ˆÈã‚ª1‚Â‚Ì‹C“›‚ÉW’†‚µ‚Ä‚¢‚È‚©‚Á‚½ƒP[ƒX */
+
+            u1t_xemfkw = (u1)0x00U;
+            if ( u1t_excdmfw == (u1)ON )                          /* ‘ÎŒü‹C“›¸‰Î */
+            {
+                u1t_ncylw_c = u1s_EMFNG_NCYLW;
+                for ( u1t_i = (u1)0; u1t_i < u1t_ncylw_c; u1t_i++ )
+                {
+                    if ( u1g_emfng_ecdmfw[u1t_i] > u1s_emfng_ekldmfw1_mcr )    /* ”»’è(b) */
+                    {
+                        u1t_xemfk_opps = u1s_emfng_cylwtocyl_tbl[u1t_i];   /* ‹C“›ŒQ‚É‘Î‰‚·‚éÀ‹C“›ƒrƒbƒg */
+ #if JENCYL == u1g_EJCC_6CYL    /*y6‹C“›z*/
+                        if ( ( u1t_xemfk_opps & u1t_xemfk ) == (u1)0x00U )
+                                                                /* ecdmfem[](ecdmfem2[])‚É‚æ‚é”»’è‚ÅŠù‚ÉƒrƒbƒgƒZƒbƒg */
+ #endif
+                        {                                           /* ‚³‚ê‚Ä‚¢‚éê‡‚ÍƒrƒbƒgƒZƒbƒg‚µ‚È‚¢ */
+                            u1t_xemfkw |= u1t_xemfk_opps;           /* ‹C“›ŒQ‚É‘Î‰‚·‚éÀ‹C“›ƒrƒbƒg‚ğ1 */
+                        }
+                    }
+                }
+            }
+            u1t_xemfk |= u1t_xemfkw;                                /* ”»’è(a)‚Æ(b)‚ÌOR‚ğ‚Æ‚é */
+        } /* EMˆ«‰»ÚÍŞÙˆÙí or G”}OTÚÍŞÙˆÙí‚Ì”»’èI—¹ */
+    } /* DI,PFIˆÙíŒŸoˆÈŠO‚Ì”»’èI—¹ */
+
+    /* DTCo—Í‹C“›‚ÌZo */
+    u1s_emfng_emfk = u1t_xemfk;
+
+    /***************************/
+    /* “d‹Z‚Ö‚Ì¸‰ÎOBDˆÙí’Ê’m */
+    /***************************/
+ #if JETCORE_D == u1g_EJCC_NOT_USE                 /*yt-CORE‘Î‰–³z*/
+    /* G”}OTÚÍŞÙŒ»İˆÙí’Ê’m */
+    if ( u1t_xdmfot == (u1)ON )
+    {
+        vdg_wmf_fdi_ot_fald_u1( u1t_xemfk );     /* G”}OTÚÍŞÙŒ»İˆÙí’Ê’m */
+    }
+
+    /* EMˆ«‰»ÚÍŞÙŒ»İˆÙí’Ê’m */
+    if ( ( u1t_xdmfem == (u1)ON )
+  #if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+      || ( u1t_xdmfdi == (u1)ON )
+      || ( u1t_xdmfpfi == (u1)ON )
+  #endif
+       )
+    {
+        vdg_wmf_fdi_em_fald_u1( u1t_xemfk );       /* EMˆ«‰»ÚÍŞÙŒ»İˆÙí’Ê’m */
+    }
+ #endif
+
+    /* G”}OTÚÍŞÙ–{ÄØ¯ÌßˆÙí’Ê’m yt-CORE‘Î‰–³z*/
+    /* G”}OT¸‰Î—¦’´‰ß’Ê’m yt-CORE‘Î‰—Lz*/
+    if ( u1t_xumfot == (u1)ON )
+    {
+ #if JETCORE_D == u1g_EJCC_NOT_USE    /*yt-CORE‘Î‰–³z*/
+        vdg_wmf_fdi_ot_excmf();     /* G”}OTÚÍŞÙ³í”»’è•Û—¯’Ê’m */
+ #else                                /*yt-CORE‘Î‰—Lz*/
+        u1t_otcnd = u1g_WMF_FDI_DURING_FTPCYCLE;
+        if ( bis_emfng_exoutftp == (u1)ON )
+        {
+            u1t_otcnd = u1g_WMF_FDI_OUTOF_FTPCYCLE;
+        }
+        vdg_wmf_fdi_ot_excmf_u2u1( (u2)u1t_xemfk, u1t_otcnd );    /* G”}OT¸‰Î—¦’´‰ß’Ê’m */
+ #endif
+    }
+
+    /* EMˆ«‰»ÚÍŞÙ–{ÄØ¯ÌßˆÙí’Ê’m yt-CORE‘Î‰–³z*/
+    /* EMˆ«‰»¸‰Î—¦’´‰ß’Ê’m yt-CORE‘Î‰—Lz*/
+    if ( ( u1t_xumfem == (u1)ON )
+ #if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+      || ( u1t_xumfdi == (u1)ON )
+      || ( u1t_xumfpfi == (u1)ON )
+ #endif
+       )
+    {
+ #if JETCORE_D == u1g_EJCC_NOT_USE      /*yt-CORE‘Î‰–³z*/
+        vdg_wmf_fdi_em_excmf();       /* EMˆ«‰»ÚÍŞÙ³í”»’è•Û—¯ */
+ #else                                  /*yt-CORE‘Î‰—Lz*/
+        u1t_emcnd = u1g_WMF_FDI_AFTER_FIRST1000RPM;
+        if ( ( bis_emfng_exemfst == (u1)ON )
+#if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‚ˆ³’¼•¬—Lz*/
+          || ( u1t_xumfdi == (u1)ON )
+          || ( u1t_xumfpfi == (u1)ON )
+#endif
+           )
+        {
+            u1t_emcnd = u1g_WMF_FDI_WITHIN_FIRST1000RPM;
+        }
+        vdg_wmf_fdi_em_excmf_u2u1( (u2)u1t_xemfk, u1t_emcnd );    /* EMˆ«‰»¸‰Î—¦’´‰ß’Ê’m */
+ #endif
+    }
+
+    /* G”}OT‚É‚æ‚éMIL“_–Å’Ê’m */
+    if ( u1t_xhmfoton == (u1)ON )
+    {
+ #if JETCORE_D == u1g_EJCC_NOT_USE               /*yt-CORE‘Î‰–³z*/
+        vdg_wmf_fdi_mil_blink_u1( (u1)ON );    /* MIL“_–Å’Ê’m */
+ #endif
+        vdg_wmf_fdi_ot_imdf();                 /* G”}OT¸‰ÎÌª°Ù¾°Ìî•ñŒ»İˆÙí’Ê’m */
+    }
+
+    /* G”}OT‚É‚æ‚éMIL“_–Å·¬İ¾Ù’Ê’m */
+    if ( u1t_xhmfotoff == (u1)ON )
+    {
+ #if JETCORE_D == u1g_EJCC_NOT_USE               /*yt-CORE‘Î‰–³z*/
+        vdg_wmf_fdi_mil_blink_u1( (u1)OFF );   /* MIL“_–Å·¬İ¾Ù’Ê’m */
+ #else                                           /*yt-CORE‘Î‰—Lz*/
+        vdg_wmf_fdi_pas_u2u1( u2g_WMF_FDI_ID_OT,(u1)ON );   /* OT¸‰Î³í”»’è */
+ #endif
+        vdg_wmf_fdi_ot_imdnf();                /* G”}OT¸‰ÎÌª°Ù¾°Ìî•ñŒ»İˆÙíŠO’Ê’m */
+    }
+
+ #if JETCORE_D == u1g_EJCC_USE                  /*yt-CORE‘Î‰—Lz*/
+    /* ¸‰ÎOBDŒ»İˆÙíƒtƒ‰ƒO‚ÌZo */
+    if ( ( u1t_xdmfot == (u1)ON )
+      || ( u1t_xdmfem == (u1)ON )
+  #if ( JEEFI == u1g_EJCC_DUAL ) && ( JEHIPFI_E == u1g_EJCC_USE )   /*yÃŞ­±ÙINJzANDy‰·ŠÔÎß°Ä•¬Ë—Lz*/
+      || ( u1t_xdmfdi == (u1)ON )
+      || ( u1t_xdmfpfi == (u1)ON )
+  #endif
+       )
+    {
+        u1t_exdmf = (u1)ON;
+    }
+
+    if ( u1s_emfng_xreqclr_Lch == (u1)ON )
+    {
+        u1t_exdmf = (u1)OFF;
+    }
+    /* RAMƒf[ƒ^‚ÉŠi”[ */
+    glbitcp_bibi( u1t_exdmf, big_emfng_exdmf );               /* ¸‰ÎOBDŒ»İˆÙíÌ×¸Ş */
+
+  #if JEOBDUDS_D == u1g_EJCC_USE                /*yOBDonUDS‘Î‰—Lz*/
+    /* ÚÃŞ¨È½¾¯Ä‚Ì‚½‚ß‚Ì1000rev–ˆ³í’Ê’m */
+    if ( ( u1s_emfng_pas == (u1)ON )
+      && ( ( u1t_exdmf == (u1)OFF )
+        && ( ( big_wmf_fdi_xot_pnd == (u1)OFF )
+          && ( big_wmf_fdi_xem_pnd == (u1)OFF ) )
+        && ( ( u1s_emfng_xot_lstpnd_Lch == (u1)OFF )
+          && ( u1s_emfng_xem_lstpnd_Lch == (u1)OFF ) )
+        && ( ( u1s_emfng_xot_warning_Lch == (u1)OFF )
+          && ( u1s_emfng_xem_warning_Lch == (u1)OFF ) )
+        && ( ( u1s_emfng_ecxmf1 == u1s_EMFNG_CXMF1PAS )
+          && ( u1s_emfng_ecxmf == u1s_EMFNG_CXMFPAS ) ) ) )
+    {
+        vdg_wmf_fdi_pas_u2u1( u2g_WMF_FDI_ID_EM,(u1)ON );    /* EM¸‰Î³í”»’è */
+    }
+  #endif
+ #endif
+
+}
+#endif /* JEMFDTC_D */
+
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_eocmfmlt_pt()                              */
+/*  ˆ—“à—e      | sê’²¸RAMXVˆ—                              */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| 65ms–ˆ(emfng_65msl()‚æ‚èƒR[ƒ‹)                  */
+/*  ˆø”          | ptt_ecdmfw[](æ“ªƒAƒhƒŒƒX)                       */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      | “à•”ŠÖ”ysê’²¸—Lz                           */
+/*********************************************************************/
+static void
+emfng_eocmfmlt_pt( const u1 ptt_ecdmfw[] )
+{
+ #if JENCYL == u1g_EJCC_6CYL    /*y6‹C“›z*/
+    s4 s4t_i;               /* lsb=1 :forƒ‹[ƒv—p•Ï” */
+    u2 u2t_ocmfmlth;        /* lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î‰ñ”(‘å)‚Ì•p“x */
+    u2 u2t_ocmfmltl;        /* lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î‰ñ”(¬)‚Ì•p“x */
+    s4 s4t_ecdmfw[3];       /* lsb=1,unit=‰ñ :‹C“›ŒQÅ‘å”•ª */
+    s4 s4t_enejsm;          /* lsb=200/8,unit=rpm :NE‚È‚Ü‚µ’l */
+    u1 u1t_onemfmlt;        /* lsb=200/8,unit=rpm :‘ÎŒü‹C“›¸‰Î‚Ì´İ¼Şİ‰ñ“]‚È‚Ü‚µ’l */
+    u1 u1t_jdg;
+    u1 u1t_ncylw_c;         /* lsb=1 :‹C“›ŒQ” */
+ #endif
+    u1 u1t_cdmfaot;         /* lsb=1,unit=‰ñ :G”}OTÚÍŞÙ‘S‹C“›¸‰Î¶³İÀ */
+    u1 u1t_ocdmfaotmx;      /* lsb=1,unit=‰ñ :200rev–ˆ‚ÌÅ‘å‘¸‰Î‰ñ” */
+    s2 s2t_thw;             /* lsb=160/128,unit= :´İ¼Şİ§Œä—p…‰· */
+    s1 s1t_othwot;          /* lsb=160/128,unit= :Å‘å¸‰Î¶³İÀXV‚Ì…‰· */
+    s2 s2t_tha;             /* lsb=160/128,unit= :´İ¼Şİ§Œä—p‹z‹C‰· */
+    s1 s1t_othaot;          /* lsb=160/128,unit= :Å‘å¸‰Î¶³İÀXV‚Ì‹z‹C‰· */
+    u1 u1t_ecjemrev;        /* lsb=1,unit=‰ñ :n“®ŒãEMˆ«‰»ƒŒƒxƒ‹”»’è‰ñ”(ƒc[ƒ‹Œx‰ñ”ğ‚Ìˆ×) */
+
+    /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+ #if JENCYL == u1g_EJCC_6CYL    /*y6‹C“›z*/
+    u1t_jdg = (u1)OFF;
+    u1t_ncylw_c = u1s_EMFNG_NCYLW;
+    for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncylw_c; s4t_i++ )
+    {
+        s4t_ecdmfw[s4t_i] = (s4)ptt_ecdmfw[s4t_i];
+    }
+    if ( ( s4t_ecdmfw[0] >= (s4)50 )
+      || ( s4t_ecdmfw[1] >= (s4)50 )
+      || ( s4t_ecdmfw[2] >= (s4)50 ) )
+    {
+        u2t_ocmfmlth = u2g_emfng_eocmfmlth();         /* eocmfmlthæ“¾ */
+        if ( u2t_ocmfmlth < u2g_U2MAX )
+        {
+            u2t_ocmfmlth++;                               /* lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î‰ñ”‘å‚Ì•p“x */
+        }
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCMFMLTH_U2_ID, (void *)&u2t_ocmfmlth );   /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        u1t_jdg = (u1)ON;
+    }
+    else if ( ( s4t_ecdmfw[0] >= (s4)20 )
+           || ( s4t_ecdmfw[1] >= (s4)20 )
+           || ( s4t_ecdmfw[2] >= (s4)20 ) )
+    {
+        u2t_ocmfmltl = u2g_emfng_eocmfmltl();         /* eocmfmltlæ“¾ */
+        if ( u2t_ocmfmltl < u2g_U2MAX )
+        {
+            u2t_ocmfmltl++;                               /* lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î‰ñ”¬‚Ì•p“x */
+        }
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCMFMLTL_U2_ID, (void *)&u2t_ocmfmltl );   /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        u1t_jdg = (u1)ON;
+    }
+    else
+    {
+        /* ˆ—‚È‚µ */
+    }
+
+    if ( u1t_jdg == (u1)ON )
+    {
+        s4t_enejsm = s4g_glbitcal_s4sftr_s4u1( (s4)s2g_eobdsm_enejsm, (u1)5U );
+        ELIB_HILOGD2( s4t_enejsm, (s4)u1g_U1MAX, (s4)u1g_U1MIN, s4t_enejsm );
+        u1t_onemfmlt = (u1)s4t_enejsm;
+        (void)s4g_ememctr_write( u2g_EMFNG_EONEMFMLT_U1_ID, (void *)&u1t_onemfmlt );   /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+                                                 /* lsb=200/256¨200/8,unit=rpm :sê’²¸RAMXV‚Ìenejsm */
+    }
+ #endif
+
+    /**********************/
+    /*     ‰Šú‰»ˆ—     */
+    /**********************/
+    u1t_cdmfaot = u1g_emfng_ecdmfaot;
+
+    /* ƒoƒbƒNƒAƒbƒvRAMæ“¾ */
+    u1t_ocdmfaotmx = u1g_emfng_eocdmfaotmx();        /* lsb=1, unit=‰ñ */
+
+    if ( u1t_ocdmfaotmx < u1t_cdmfaot )
+    {
+        s2t_thw = s2g_glbitcal_s2sftr_s2u1( s2g_ethw_ethw, (u1)1U );
+        ELIB_HILOGD2( s2t_thw, (s2)s1g_S1MAX, (s2)s1g_S1MIN, s2t_thw );
+        s1t_othwot = (s1)s2t_thw;
+        s2t_tha = s2g_glbitcal_s2sftr_s2u1( s2g_etha_etha, (u1)1U );
+        ELIB_HILOGD2( s2t_tha, (s2)s1g_S1MAX, (s2)s1g_S1MIN, s2t_tha );
+        s1t_othaot = (s1)s2t_tha;
+
+        /****************************************************/
+        /* 200rev’†‚Ì¸‰Î‰ñ”‚ªÅ‘åAƒoƒbƒNƒAƒbƒvRAMXV  */
+        /****************************************************/
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCDMFAOTMX_U1_ID, (void *)&u1t_cdmfaot );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        u1t_ecjemrev = u1s_emfng_ecjemrev;
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCJREVOT_U1_ID, (void *)&u1t_ecjemrev );   /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOTHWOT_S1_ID, (void *)&s1t_othwot );       /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOTHAOT_S1_ID, (void *)&s1t_othaot );       /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+    }
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_eocmfn_u2()                                */
+/*  ˆ—“à—e      | sê’²¸RAMXVˆ—                              */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| 65ms–ˆ(emfng_65msl()‚æ‚èƒR[ƒ‹)                  */
+/*  ˆø”          | u2t_cdmfae lsb=1 :EMˆ«‰»ÚÍŞÙ¸‰Î‰ñ”             */
+/*                |                   (‘S‹C“›•ª)¶³İÀ(CDMFAE2)        */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      | “à•”ŠÖ”ysê’²¸—Lz                           */
+/*********************************************************************/
+static void
+emfng_eocmfn_u2( u2 u2t_cdmfae )
+{
+    u2  u2t_ocmfnh;         /* lsb=1,unit=‰ñ :¸‰Î‰ñ”(‘å)‚Ì•p“x */
+    u2  u2t_ocmfnm;         /* lsb=1,unit=‰ñ :¸‰Î‰ñ”(’†)‚Ì•p“x */
+    u2  u2t_ocmfnl;         /* lsb=1,unit=‰ñ :¸‰Î‰ñ”(¬)‚Ì•p“x */
+    s4  s4t_i;              /* lsb=1 :forƒ‹[ƒv—p•Ï” */
+    u2  u2t_cdmfae2;        /* lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ‘S‹C“›¸‰Î¶³İÀ */
+    u2  u2t_cdmfae2gd;      /* lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ‘S‹C“›¸‰Î¶³İÀ¶Ş°ÄŞ’l */
+    u1  u1t_cdmfae2gd;      /* lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ‘S‹C“›¸‰Î¶³İÀ¶Ş°ÄŞ’l(‘‚«‚İ—p) */
+    u1  u1t_ocdmfae2mx;     /* lsb=1,unit=‰ñ :1000rev–ˆ‚ÌÅ‘å‘¸‰Î‰ñ” */
+    s2  s2t_thw;            /* lsb=160/128,unit= :´İ¼Şİ§Œä—p…‰· */
+    s1  s1t_othwem;         /* lsb=160/128,unit= :Å‘å¸‰Î¶³İÀXV‚Ì…‰· */
+    s2  s2t_tha;            /* lsb=160/128,unit= :´İ¼Şİ§Œä—p‹z‹C‰· */
+    s1  s1t_othaem;         /* lsb=160/128,unit= :Å‘å¸‰Î¶³İÀXV‚Ì‹z‹C‰· */
+    u2  u2t_ecdmfem2;       /* lsb=1,unit=‰ñ :EMˆ«‰»ÚÍŞÙ‹C“›•Ê¸‰Î¶³İÀ */
+    u1  u1t_ocdmfem2mx;     /* lsb=1,unit=‰ñ :Å‘å¸‰Î¶³İÀXV‚Ì‹C“›•Ê¸‰Î¶³İÀ */
+    s4  s4t_spdav;          /* lsb=256/256,unit=km/h :1000rev’†‚Ì¸‰Î‰ñ”Å‘å‚Ì¸‰Î‰ñ”±¯Ìß•½‹ÏÔ‘¬ */
+    u1  u1t_ospdemav;       /* lsb=256/256,unit=km/h :1000rev’†‚Ì¸‰Î‰ñ”Å‘å‚Ì¸‰Î‰ñ”±¯Ìß•½‹ÏÔ‘¬(‘‚«‚İ—p) */
+    s4  s4t_neemav;         /* lsb=12800/256,unit=rpm :¸‰Î‰ñ”UP‚Ì•½‹Ï´İ¼Şİ‰ñ“]” */
+    u1  u1t_oneemav;        /* lsb=12800/256,unit=rpm :¸‰Î‰ñ”UP‚Ì•½‹Ï´İ¼Şİ‰ñ“]”(‘‚«‚İ—p) */
+    s4  s4t_klsmemav;       /* lsb=320/256,unit=% :¸‰Î‰ñ”UP‚Ì•½‹Ï•‰‰× */
+    u1  u1t_oklsmemav;      /* lsb=320/256,unit=% :¸‰Î‰ñ”UP‚Ì•½‹Ï•‰‰×(‘‚«‚İ—p) */
+    u1  u1t_ecjmfneemi;     /* lsb=1,unit=‰ñ :1000revŠÔ‚Ì±²ÄŞÙÓ°ÄŞ‰ñ”(ƒc[ƒ‹Œx‰ñ”ğ‚Ìˆ×) */
+    u1  u1t_ecjmfneeml;     /* lsb=1,unit=‰ñ :1000revŠÔ‚ÌÛ°Ó°ÄŞ‰ñ”(ƒc[ƒ‹Œx‰ñ”ğ‚Ìˆ×) */
+    u1  u1t_ecjmfneemh;     /* lsb=1,unit=‰ñ :1000revŠÔ‚ÌÊ²Ó°ÄŞ‰ñ”(ƒc[ƒ‹Œx‰ñ”ğ‚Ìˆ×) */
+    u1  u1t_ecjemrev;       /* lsb=1,unit=‰ñ :n“®ŒãEMˆ«‰»ƒŒƒxƒ‹”»’è‰ñ”(ƒc[ƒ‹Œx‰ñ”ğ‚Ìˆ×) */
+    u1  u1t_ncyl_c;         /* lsb=1 :‹C“›” */
+
+    if ( u2t_cdmfae >= u2s_emfng_ecmfnh_mcr )
+    {
+        u2t_ocmfnh = u2g_emfng_eocmfnh();         /* eocmfnhæ“¾ */
+        if ( u2t_ocmfnh < u2g_U2MAX )
+        {
+            u2t_ocmfnh++;                             /* lsb=1,unit=‰ñ :¸‰Î‰ñ”(‘å)‚Ì•p“x */
+        }
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCMFNH_U2_ID, (void *)&u2t_ocmfnh );               /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+    }
+    else if ( u2t_cdmfae >= u2s_emfng_ecmfnm_mcr )
+    {
+        u2t_ocmfnm = u2g_emfng_eocmfnm();         /* eocmfnmæ“¾ */
+        if ( u2t_ocmfnm < u2g_U2MAX )
+        {
+            u2t_ocmfnm++;                             /* lsb=1,unit=‰ñ :¸‰Î‰ñ”(’†)‚Ì•p“x */
+        }
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCMFNM_U2_ID, (void *)&u2t_ocmfnm );               /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+    }
+    else if ( u2t_cdmfae >= u2s_emfng_ecmfnl_mcr )
+    {
+        u2t_ocmfnl = u2g_emfng_eocmfnl();         /* eocmfnlæ“¾ */
+        if ( u2t_ocmfnl < u2g_U2MAX )
+        {
+            u2t_ocmfnl++;                             /* lsb=1,unit=‰ñ :¸‰Î‰ñ”(¬)‚Ì•p“x */
+        }
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCMFNL_U2_ID, (void *)&u2t_ocmfnl );               /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+    }
+    else
+    {
+        /* ˆ—‚È‚µ */
+    }
+
+    /**********************/
+    /*     ‰Šú‰»ˆ—     */
+    /**********************/
+    u2t_cdmfae2 = u2g_emfng_ecdmfae2;
+    ELIB_HIGHGD2( u2t_cdmfae2, (u2)u1g_U1MAX, u2t_cdmfae2gd );
+    /* ƒoƒbƒNƒAƒbƒvRAMæ“¾ */
+    u1t_ocdmfae2mx = u1g_emfng_eocdmfae2mx();        /* lsb=1, unit=‰ñ */
+
+    if ( u1t_ocdmfae2mx < (u1)u2t_cdmfae2gd )
+    {
+        s2t_thw = s2g_glbitcal_s2sftr_s2u1( s2g_ethw_ethw, (u1)1U );
+        ELIB_HILOGD2( s2t_thw, (s2)s1g_S1MAX, (s2)s1g_S1MIN, s2t_thw );
+        s1t_othwem = (s1)s2t_thw;
+        s2t_tha = s2g_glbitcal_s2sftr_s2u1( s2g_etha_etha, (u1)1U );
+        ELIB_HILOGD2( s2t_tha, (s2)s1g_S1MAX, (s2)s1g_S1MIN, s2t_tha );
+        s1t_othaem = (s1)s2t_tha;
+
+        s4t_spdav = s4g_gldiv_s4s4( s4s_emfng_espdaem, (s4)u2t_cdmfae2 );
+        ELIB_HILOGD2( s4t_spdav, (s4)u1g_U1MAX, (s4)u1g_U1MIN, s4t_spdav );
+        u1t_ospdemav = (u1)s4t_spdav;
+        s4t_neemav = s4g_glbitcal_s4sftr_s4u1( s4s_emfng_eneaem, (u1)6U );  /* lsb=12800/64/256 -> 12800/256 */
+        s4t_neemav = s4g_gldiv_s4s4( s4t_neemav, (s4)u2t_cdmfae2 );
+        ELIB_HILOGD2( s4t_neemav, (s4)u1g_U1MAX, (s4)u1g_U1MIN, s4t_neemav );
+        u1t_oneemav = (u1)s4t_neemav;
+        s4t_klsmemav = s4g_glbitcal_s4sftr_s4u1( s4s_emfng_eklsmaem, (u1)6U );  /* lsb=320/64/256 -> 320/256 */
+        s4t_klsmemav = s4g_gldiv_s4s4( s4t_klsmemav, (s4)u2t_cdmfae2 );
+        ELIB_HILOGD2( s4t_klsmemav, (s4)u1g_U1MAX, (s4)u1g_U1MIN, s4t_klsmemav );
+        u1t_oklsmemav = (u1)s4t_klsmemav;
+
+        /****************************************************/
+        /* 1000rev’†‚Ì¸‰Î‰ñ”‚ªÅ‘åAƒoƒbƒNƒAƒbƒvRAMXV */
+        /****************************************************/
+        u1t_cdmfae2gd = (u1)u2t_cdmfae2gd;
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCDMFAE2MX_U1_ID, (void *)&u1t_cdmfae2gd );        /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        u1t_ecjemrev = u1s_emfng_ecjemrev;
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCJREVEM_U1_ID, (void *)&u1t_ecjemrev );           /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOTHWEM_S1_ID, (void *)&s1t_othwem );               /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOTHAEM_S1_ID, (void *)&s1t_othaem );               /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+
+        u1t_ncyl_c = u1g_ejcc_NCYL;
+        for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncyl_c; s4t_i++ )
+        {
+            u2t_ecdmfem2 = u2g_emfng_ecdmfem2[s4t_i];
+            ELIB_HIGHGD2( u2t_ecdmfem2, (u2)u1g_U1MAX, u2t_ecdmfem2 );
+            u1t_ocdmfem2mx = (u1)u2t_ecdmfem2;
+            (void)s4g_ememctr_write( u2s_EOCDMFEM2MX_U1_ID[s4t_i], (void *)&u1t_ocdmfem2mx );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        }
+
+        (void)s4g_ememctr_write( u2g_EMFNG_EOSPDEMAV_U1_ID, (void *)&u1t_ospdemav );           /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EONEEMAV_U1_ID, (void *)&u1t_oneemav );             /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOKLSMEMAV_U1_ID, (void *)&u1t_oklsmemav );         /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+
+        u1t_ecjmfneemi = u1s_emfng_ecjmfneemi;
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCJMFNEEMI_U1_ID, (void *)&u1t_ecjmfneemi );       /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        u1t_ecjmfneeml = u1s_emfng_ecjmfneeml;
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCJMFNEEML_U1_ID, (void *)&u1t_ecjmfneeml );       /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        u1t_ecjmfneemh = u1s_emfng_ecjmfneemh;
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCJMFNEEMH_U1_ID, (void *)&u1t_ecjmfneemh );       /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+    }
+}
+#endif /* JEOOBD */
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_cntclr_65msl( )                            */
+/*  ˆ—“à—e      | ŠO•”QÆ¸‰Î¶³İÀ‚Ì¸Ø±ˆ—                        */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| 65ms–ˆ(emfcnt_65msl‚æ‚èƒR[ƒ‹)                   */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      |                                                  */
+/*********************************************************************/
+void
+emfng_cntclr_65msl( void )
+{
+    s4 s4t_i;           /* lsb=1 :forƒ‹[ƒv—p•Ï” */
+    u1 u1t_ncyl_c;      /* lsb=1 :‹C“›” */
+    u1 u1t_ncylw_c;     /* lsb=1 :‹C“›ŒQ” */
+
+    /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+    u1t_ncyl_c = u1g_ejcc_NCYL;
+    /***************/
+    /* ¶³İÀ¸Ø±ˆ— */
+    /***************/
+    glint_di(); /* ¥¥¥ Š„‚è‚İ‹Ö~ ¥¥¥ */
+    if ( big_emfng_excdmfemclr == (u1)ON )      /* ecdmfem[]¸Ø±—v‹—L‚è */
+    {
+        for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncyl_c; s4t_i++ )
+        {
+            u1g_emfng_ecdmfem[s4t_i] = (u1)0U;
+        }
+    }
+    if ( bis_emfng_excdmfem2clr == (u1)ON )     /* ecdmfem2[]¸Ø±—v‹—L‚è */
+    {
+        for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncyl_c; s4t_i++ )
+        {
+            u2g_emfng_ecdmfem2[s4t_i] = (u2)0U;
+        }
+    }
+    if ( bis_emfng_excdmfwclr == (u1)ON )       /* ecdmfw[]¸Ø±—v‹—L‚è */
+    {
+        u1t_ncylw_c = u1s_EMFNG_NCYLW;
+        for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncylw_c; s4t_i++ )
+        {
+            u1g_emfng_ecdmfw[s4t_i] = (u1)0U;
+        }
+    }
+
+    if ( bis_emfng_excdmfae2clr == (u1)ON )     /* ecdmfae2¸Ø±—v‹—L‚è */
+    {
+        u2g_emfng_ecdmfae2 = (u2)0U;
+    }
+
+    glint_ei(); /* £££ Š„‚è‚İ‹–‰Â £££ */
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_eocmfnl( )                             */
+/*  ˆ—“à—e      | sê’²¸RAM ¸‰Î‰ñ”(¬)‚Ì•p“x æ“¾ŠÖ”          */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ¸‰Î‰ñ”(¬)‚Ì•p“x lsb=1,unit=‰ñ                 */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u2
+u2g_emfng_eocmfnl( void )
+{
+    u2 u2t_eocmfnl;     /* lsb=1,unit=‰ñ :¸‰Î‰ñ”(¬)‚Ì•p“x */
+
+    u2t_eocmfnl = (u2)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOCMFNL_U2_ID, (void *)&u2t_eocmfnl );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( u2t_eocmfnl );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_eocmfnm( )                             */
+/*  ˆ—“à—e      | sê’²¸RAM ¸‰Î‰ñ”(’†)‚Ì•p“x æ“¾ŠÖ”          */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ¸‰Î‰ñ”(’†)‚Ì•p“x lsb=1,unit=‰ñ                 */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u2
+u2g_emfng_eocmfnm( void )
+{
+    u2 u2t_eocmfnm;     /* lsb=1,unit=‰ñ :¸‰Î‰ñ”(’†)‚Ì•p“x */
+
+    u2t_eocmfnm = (u2)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOCMFNM_U2_ID, (void *)&u2t_eocmfnm );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( u2t_eocmfnm );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_eocmfnh( )                             */
+/*  ˆ—“à—e      | sê’²¸RAM ¸‰Î‰ñ”(‘å)‚Ì•p“x æ“¾ŠÖ”          */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ¸‰Î‰ñ”(‘å)‚Ì•p“x lsb=1,unit=‰ñ                 */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u2
+u2g_emfng_eocmfnh( void )
+{
+    u2 u2t_eocmfnh;     /* lsb=1,unit=‰ñ :¸‰Î‰ñ”(‘å)‚Ì•p“x */
+
+    u2t_eocmfnh = (u2)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOCMFNH_U2_ID, (void *)&u2t_eocmfnh );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( u2t_eocmfnh );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_eocmfmltl( )                           */
+/*  ˆ—“à—e      | sê’²¸RAM ‘ÎŒü‹C“›¸‰Î‰ñ”(¬)‚Ì•p“x æ“¾ŠÖ”  */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ‘ÎŒü‹C“›¸‰Î‰ñ”(¬)‚Ì•p“x lsb=1,unit=‰ñ         */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u2
+u2g_emfng_eocmfmltl( void )
+{
+    u2 u2t_eocmfmltl;   /* lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î‰ñ”(¬)‚Ì•p“x */
+
+    u2t_eocmfmltl = (u2)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOCMFMLTL_U2_ID, (void *)&u2t_eocmfmltl );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( u2t_eocmfmltl );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_eocmfmlth( )                           */
+/*  ˆ—“à—e      | sê’²¸RAM ‘ÎŒü‹C“›¸‰Î‰ñ”(‘å)‚Ì•p“x æ“¾ŠÖ”  */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ‘ÎŒü‹C“›¸‰Î‰ñ”(‘å)‚Ì•p“x lsb=1,unit=‰ñ         */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u2
+u2g_emfng_eocmfmlth( void )
+{
+    u2 u2t_eocmfmlth;   /* lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î‰ñ”(‘å)‚Ì•p“x */
+
+    u2t_eocmfmlth = (u2)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOCMFMLTH_U2_ID, (void *)&u2t_eocmfmlth );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( u2t_eocmfmlth );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u1g_emfng_eonemfmlt( )                           */
+/*  ˆ—“à—e      | sê’²¸RAM ‘ÎŒü‹C“›¸‰Î‚Ì´İ¼Şİ‰ñ“]‚È‚Ü‚µ’l æ“¾ŠÖ” */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ‘ÎŒü‹C“›¸‰Î‚Ì´İ¼Şİ‰ñ“]‚È‚Ü‚µ’l                */
+/*                | lsb=200/8, unit=rpm                              */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u1
+u1g_emfng_eonemfmlt( void )
+{
+    u1 u1t_eonemfmlt;   /* lsb=200/8,unit=rpm :‘ÎŒü‹C“›¸‰Î‚Ì´İ¼Şİ‰ñ“]‚È‚Ü‚µ’l */
+
+    u1t_eonemfmlt = (u1)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EONEMFMLT_U1_ID, (void *)&u1t_eonemfmlt );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( u1t_eonemfmlt );        /* lsb=200/8,unit=rpm */
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_ecdmfaemTv( )                          */
+/*  ˆ—“à—e      | Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‘S‹C“›)æ“¾ŠÖ” */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‘S‹C“›)         */
+/*                |                        lsb=1,unit=‰ñ             */
+/*  ’ˆÓ–€      |  ƒXƒP[ƒŠƒ“ƒOID =24(ISO 15031-5)                 */
+/*********************************************************************/
+u2
+u2g_emfng_ecdmfaemTv( void )
+{
+    u2 u2t_ecdmfaemTv;   /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‘S‹C“›) */
+
+    u2t_ecdmfaemTv = (u2)0U;  /* ƒ_ƒ~[İ’è */
+    (void)s4g_ememctr_read( u2g_EMFNG_ECDMFAEMTV_U2_ID, (void *)&u2t_ecdmfaemTv );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+
+    return( u2t_ecdmfaemTv );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_ecdmfaemMntl( )                        */
+/*  ˆ—“à—e      | Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ‰ºŒÀ’l(‘S‹C“›)æ“¾ŠÖ” */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ‰ºŒÀ’l(‘S‹C“›)   */
+/*                |                        lsb=1,unit=‰ñ             */
+/*  ’ˆÓ–€      |  ƒXƒP[ƒŠƒ“ƒOID =24(ISO 15031-5)                 */
+/*********************************************************************/
+u2
+u2g_emfng_ecdmfaemMntl( void )
+{
+    u2 u2t_ecdmfaemMntl;   /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ‰ºŒÀ’l(‘S‹C“›) */
+
+    u2t_ecdmfaemMntl = (u2)0U;  /* ƒ_ƒ~[İ’è */
+    (void)s4g_ememctr_read( u2g_EMFNG_ECDMFAEMMNTL_U2_ID, (void *)&u2t_ecdmfaemMntl );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+
+    return( u2t_ecdmfaemMntl );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_ecdmfaemMxtl( )                        */
+/*  ˆ—“à—e      | Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀãŒÀ’l(‘S‹C“›)æ“¾ŠÖ” */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀãŒÀ’l(‘S‹C“›)   */
+/*                |                        lsb=1,unit=‰ñ             */
+/*  ’ˆÓ–€      |  ƒXƒP[ƒŠƒ“ƒOID =24(ISO 15031-5)                 */
+/*********************************************************************/
+u2
+u2g_emfng_ecdmfaemMxtl( void )
+{
+    u2 u2t_ecdmfaemMxtl;   /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀãŒÀ’l(‘S‹C“›) */
+
+    u2t_ecdmfaemMxtl = (u2)0U;  /* ƒ_ƒ~[İ’è */
+    (void)s4g_ememctr_read( u2g_EMFNG_ECDMFAEMMXTL_U2_ID, (void *)&u2t_ecdmfaemMxtl );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+
+    return( u2t_ecdmfaemMxtl );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_ecdmfemTv( )                           */
+/*  ˆ—“à—e      | Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‹C“›•Ê)æ“¾ŠÖ” */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | u1t_cyl  :lsb=1 ‹C“›                             */
+/*  –ß‚è’l        | Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‹C“›•Ê)         */
+/*                |                        lsb=1,unit=‰ñ             */
+/*  ’ˆÓ–€      |  ƒXƒP[ƒŠƒ“ƒOID =24(ISO 15031-5)                 */
+/*********************************************************************/
+u2
+u2g_emfng_ecdmfemTv( u1 u1t_cyl )
+{
+    u2 u2t_ecdmfemTv;    /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‹C“›•Ê) */
+
+    u2t_ecdmfemTv = u2g_emfng_ECDMFEMTV_MI;
+    if ( u1t_cyl < u1g_ejcc_NCYL )
+    {
+        (void)s4g_ememctr_read( u2s_ECDMFEMTV_U2_ID[u1t_cyl], (void *)&u2t_ecdmfemTv );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+    }
+
+    return( u2t_ecdmfemTv );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_ecdmfemMntl( )                         */
+/*  ˆ—“à—e      | Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ‰ºŒÀ’l(‹C“›•Ê)æ“¾ŠÖ” */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | u1t_cyl   :lsb=1 ‹C“›                            */
+/*  –ß‚è’l        | Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ‰ºŒÀ’l(‹C“›•Ê)   */
+/*                |                        lsb=1,unit=‰ñ             */
+/*  ’ˆÓ–€      |  ƒXƒP[ƒŠƒ“ƒOID =24(ISO 15031-5)                 */
+/*********************************************************************/
+u2
+u2g_emfng_ecdmfemMntl( u1 u1t_cyl )
+{
+    u2 u2t_ecdmfemMntl;    /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ‰ºŒÀ’l(‹C“›•Ê) */
+
+    u2t_ecdmfemMntl = u2g_emfng_ECDMFEMMNTL_MI;
+    if ( u1t_cyl < u1g_ejcc_NCYL )
+    {
+        (void)s4g_ememctr_read( u2s_ECDMFEMMNTL_U2_ID[u1t_cyl], (void *)&u2t_ecdmfemMntl );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+    }
+
+    return( u2t_ecdmfemMntl );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_ecdmfemMxtl( )                         */
+/*  ˆ—“à—e      | Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀãŒÀ’l(‹C“›•Ê)æ“¾ŠÖ” */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | u1t_cyl   :lsb=1 ‹C“›                            */
+/*  –ß‚è’l        | Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀãŒÀ’l(‹C“›•Ê)   */
+/*                |                        lsb=1,unit=‰ñ             */
+/*  ’ˆÓ–€      |  ƒXƒP[ƒŠƒ“ƒOID =24(ISO 15031-5)                 */
+/*********************************************************************/
+u2
+u2g_emfng_ecdmfemMxtl( u1 u1t_cyl )
+{
+    u2 u2t_ecdmfemMxtl;    /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀãŒÀ’l(‹C“›•Ê) */
+
+    u2t_ecdmfemMxtl = u2g_emfng_ECDMFEMMXTL_MI;
+    if ( u1t_cyl < u1g_ejcc_NCYL )
+    {
+        (void)s4g_ememctr_read( u2s_ECDMFEMMXTL_U2_ID[u1t_cyl], (void *)&u2t_ecdmfemMxtl );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+    }
+
+    return( u2t_ecdmfemMxtl );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_ecdmfaavTv( )                          */
+/*  ˆ—“à—e      | Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ(‘S‹C“›)æ“¾ŠÖ” */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ(‘S‹C“›)     */
+/*                |                        lsb=1,unit=‰ñ             */
+/*  ’ˆÓ–€      |  ƒXƒP[ƒŠƒ“ƒOID =24(ISO 15031-5)                 */
+/*********************************************************************/
+u2
+u2g_emfng_ecdmfaavTv( void )
+{
+    u2 u2t_ecdmfaavTv;   /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ(‘S‹C“›) */
+
+    u2t_ecdmfaavTv = (u2)0U;  /* ƒ_ƒ~[İ’è */
+    (void)s4g_ememctr_read( u2g_EMFNG_ECDMFAAVTV_U2_ID, (void *)&u2t_ecdmfaavTv );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+
+    return( u2t_ecdmfaavTv );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_ecdmfaavMntl( )                        */
+/*  ˆ—“à—e      | Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ‰ºŒÀ’l(‘S‹C“›)æ“¾ŠÖ” */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ‰ºŒÀ’l(‘S‹C“›) */
+/*                |                        lsb=1,unit=‰ñ             */
+/*  ’ˆÓ–€      |  ƒXƒP[ƒŠƒ“ƒOID =24(ISO 15031-5)                 */
+/*********************************************************************/
+u2
+u2g_emfng_ecdmfaavMntl( void )
+{
+    u2 u2t_ecdmfaavMntl;   /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ‰ºŒÀ’l(‘S‹C“›) */
+
+    u2t_ecdmfaavMntl = (u2)0U;  /* ƒ_ƒ~[İ’è */
+    (void)s4g_ememctr_read( u2g_EMFNG_ECDMFAAVMNTL_U2_ID, (void *)&u2t_ecdmfaavMntl );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+
+    return( u2t_ecdmfaavMntl );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_ecdmfaavMxtl( )                        */
+/*  ˆ—“à—e      | Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀãŒÀ’l(‘S‹C“›)æ“¾ŠÖ” */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀãŒÀ’l(‘S‹C“›) */
+/*                |                        lsb=1,unit=‰ñ             */
+/*  ’ˆÓ–€      |  ƒXƒP[ƒŠƒ“ƒOID =24(ISO 15031-5)                 */
+/*********************************************************************/
+u2
+u2g_emfng_ecdmfaavMxtl( void )
+{
+    u2 u2t_ecdmfaavMxtl;   /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀãŒÀ’l(‘S‹C“›) */
+
+    u2t_ecdmfaavMxtl = (u2)0U;  /* ƒ_ƒ~[İ’è */
+    (void)s4g_ememctr_read( u2g_EMFNG_ECDMFAAVMXTL_U2_ID, (void *)&u2t_ecdmfaavMxtl );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+
+    return( u2t_ecdmfaavMxtl );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_ecdmfavTv( )                           */
+/*  ˆ—“à—e      | Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ(‹C“›•Ê)æ“¾ŠÖ” */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | u1t_cyl   :lsb=1 ‹C“›                            */
+/*  –ß‚è’l        | Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ(‹C“›•Ê)     */
+/*                |                        lsb=1,unit=‰ñ             */
+/*  ’ˆÓ–€      |  ƒXƒP[ƒŠƒ“ƒOID =24(ISO 15031-5)                 */
+/*********************************************************************/
+u2
+u2g_emfng_ecdmfavTv( u1 u1t_cyl )
+{
+    u2 u2t_ecdmfavTv;    /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ(‹C“›•Ê) */
+
+    u2t_ecdmfavTv = u2g_emfng_ECDMFAVTV_MI;
+    if ( u1t_cyl < u1g_ejcc_NCYL )
+    {
+        (void)s4g_ememctr_read( u2s_ECDMFAVTV_U2_ID[u1t_cyl], (void *)&u2t_ecdmfavTv );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+    }
+
+    return( u2t_ecdmfavTv );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_ecdmfavMntl( )                         */
+/*  ˆ—“à—e      | Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ‰ºŒÀ’l(‹C“›•Ê)æ“¾ŠÖ” */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | u1t_cyl   :lsb=1 ‹C“›                            */
+/*  –ß‚è’l        | Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ‰ºŒÀ’l(‹C“›•Ê) */
+/*                |                        lsb=1,unit=‰ñ             */
+/*  ’ˆÓ–€      |  ƒXƒP[ƒŠƒ“ƒOID =24(ISO 15031-5)                 */
+/*********************************************************************/
+u2
+u2g_emfng_ecdmfavMntl( u1 u1t_cyl )
+{
+    u2 u2t_ecdmfavMntl;    /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀ‰ºŒÀ’l(‹C“›•Ê) */
+
+    u2t_ecdmfavMntl = u2g_emfng_ECDMFAVMNTL_MI;
+    if ( u1t_cyl < u1g_ejcc_NCYL )
+    {
+        (void)s4g_ememctr_read( u2s_ECDMFAVMNTL_U2_ID[u1t_cyl], (void *)&u2t_ecdmfavMntl );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+    }
+
+    return( u2t_ecdmfavMntl );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u2g_emfng_ecdmfavMxtl( )                         */
+/*  ˆ—“à—e      | Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀãŒÀ’l(‹C“›•Ê)æ“¾ŠÖ” */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | u1t_cyl   :lsb=1 ‹C“›                            */
+/*  –ß‚è’l        | Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀãŒÀ’l(‹C“›•Ê) */
+/*                |                        lsb=1,unit=‰ñ             */
+/*  ’ˆÓ–€      |  ƒXƒP[ƒŠƒ“ƒOID =24(ISO 15031-5)                 */
+/*********************************************************************/
+u2
+u2g_emfng_ecdmfavMxtl( u1 u1t_cyl )
+{
+    u2 u2t_ecdmfavMxtl;    /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p‰ß‹10ÄØ¯ÌßEWMA¸‰Î¶³İÀãŒÀ’l(‹C“›•Ê) */
+
+    u2t_ecdmfavMxtl = u2g_emfng_ECDMFAVMXTL_MI;
+    if ( u1t_cyl < u1g_ejcc_NCYL )
+    {
+        (void)s4g_ememctr_read( u2s_ECDMFAVMXTL_U2_ID[u1t_cyl], (void *)&u2t_ecdmfavMxtl );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+    }
+
+    return( u2t_ecdmfavMxtl );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u1s_emfng_exrcdmf( )                             */
+/*  ˆ—“à—e      | EWMA¸‰Î¶³İÀŒvZ—š—ğÌ×¸Şæ“¾ˆ—                 */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| emfng_65msl( )                                   */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | EWMA¸‰Î¶³İÀŒvZ—š—ğÌ×¸Ş                         */
+/*  ’ˆÓ–€      | “à•”ŠÖ”                                         */
+/*********************************************************************/
+static u1
+u1s_emfng_exrcdmf( void )
+{
+    u1 u1t_exrcdmf;     /* lsb=1 :EWMA¸‰Î¶³İÀŒvZ—š—ğÌ×¸Ş */
+
+    u1t_exrcdmf = (u1)0U;  /* ƒ_ƒ~[İ’è */
+    (void)s4g_ememctr_read( u2g_EMFNG_EXRCDMF_U1_ID, (void *)&u1t_exrcdmf );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+
+    return( u1t_exrcdmf );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u1g_emfng_eocdmfae2mx( )                         */
+/*  ˆ—“à—e      | sê’²¸RAM 1000rev–ˆ‚ÌÅ‘å‘¸‰Î‰ñ” æ“¾ŠÖ”   */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | 1000rev–ˆ‚ÌÅ‘å‘¸‰Î‰ñ” lsb=1,unit=‰ñ          */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u1
+u1g_emfng_eocdmfae2mx( void )
+{
+    u1  u1t_eocdmfae2mx;    /* lsb=1,unit=‰ñ :1000rev–ˆ‚ÌÅ‘å‘¸‰Î‰ñ” */
+
+    u1t_eocdmfae2mx = (u1)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOCDMFAE2MX_U1_ID, (void *)&u1t_eocdmfae2mx );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( u1t_eocdmfae2mx );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u1g_emfng_eocjrevem( )                           */
+/*  ˆ—“à—e      | sê’²¸RAM 1000rev–ˆ‚Ìn“®Œã1000rev‰ñ” æ“¾ŠÖ” */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | 1000rev–ˆ‚Ìn“®Œã1000rev‰ñ” lsb=1,unit=‰ñ       */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u1
+u1g_emfng_eocjrevem( void )
+{
+    u1 u1t_eocjrevem;   /* lsb=1,unit=‰ñ :1000rev–ˆ‚Ìn“®Œã1000rev‰ñ” */
+
+    u1t_eocjrevem = (u1)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOCJREVEM_U1_ID, (void *)&u1t_eocjrevem );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( u1t_eocjrevem );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | s1g_emfng_eothwem( )                             */
+/*  ˆ—“à—e      | sê’²¸RAM 1000rev–ˆ‚Ì…‰· æ“¾ŠÖ”             */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | 1000rev–ˆ‚Ì…‰· lsb=160/128,unit=              */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+s1
+s1g_emfng_eothwem( void )
+{
+    s1 s1t_eothwem;     /* lsb=160/128,unit= :1000rev–ˆ‚Ì…‰· */
+
+    s1t_eothwem = (s1)0;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOTHWEM_S1_ID, (void *)&s1t_eothwem );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( s1t_eothwem );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | s1g_emfng_eothaem( )                             */
+/*  ˆ—“à—e      | sê’²¸RAM 1000rev–ˆ‚Ì‹z‹C‰· æ“¾ŠÖ”           */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | 1000rev–ˆ‚Ì‹z‹C‰· lsb=160/128,unit=            */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+s1
+s1g_emfng_eothaem( void )
+{
+    s1 s1t_eothaem;     /* lsb=160/128,unit= :1000rev–ˆ‚Ì‹z‹C‰· */
+
+    s1t_eothaem = (s1)0;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOTHAEM_S1_ID, (void *)&s1t_eothaem );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( s1t_eothaem );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u1g_emfng_eocdmfem2mx( )                         */
+/*  ˆ—“à—e      | sê’²¸RAM 1000rev–ˆ‚Ì‹C“›•Ê¸‰Î‰ñ” æ“¾ŠÖ”   */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | u1t_cyl   :lsb=1 ‹C“›                            */
+/*  –ß‚è’l        | 1000rev–ˆ‚Ì‹C“›•Ê¸‰Î‰ñ” lsb=1,unit=‰ñ          */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u1
+u1g_emfng_eocdmfem2mx( u1 u1t_cyl )
+{
+    u1 u1t_eocdmfem2mx;     /* lsb=1,unit=‰ñ :1000rev–ˆ‚Ì‹C“›•Ê¸‰Î‰ñ” */
+
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    u1t_eocdmfem2mx = u1g_emfng_EOCDMFEM2MX_MI;
+    if ( u1t_cyl < u1g_ejcc_NCYL )
+    {
+        (void)s4g_ememctr_read( u2s_EOCDMFEM2MX_U1_ID[u1t_cyl], (void *)&u1t_eocdmfem2mx );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+    }
+#else                             /*ysê’²¸–³z*/
+    u1t_eocdmfem2mx = (u1)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#endif
+    return( u1t_eocdmfem2mx );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u1g_emfng_eospdemav( )                           */
+/*  ˆ—“à—e      | sê’²¸RAM ¸‰Î¶³İÄ‚Ì•½‹ÏÔ‘¬ æ“¾ŠÖ”        */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ¸‰Î¶³İÄ‚Ì•½‹ÏÔ‘¬ lsb=256/256,unit=km/h       */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u1
+u1g_emfng_eospdemav( void )
+{
+    u1 u1t_eospdemav;   /* lsb=256/256,unit=km/h :¸‰Î¶³İÄ‚Ì•½‹ÏÔ‘¬ */
+
+    u1t_eospdemav = (u1)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOSPDEMAV_U1_ID, (void *)&u1t_eospdemav );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( u1t_eospdemav );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u1g_emfng_eoneemav( )                            */
+/*  ˆ—“à—e      | sê’²¸RAM ¸‰Î¶³İÄ‚Ì•½‹Ï´İ¼Şİ‰ñ“]” æ“¾ŠÖ” */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ¸‰Î¶³İÄ‚Ì•½‹Ï´İ¼Şİ‰ñ“]” lsb=12800/256,unit=rpm */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u1
+u1g_emfng_eoneemav( void )
+{
+    u1 u1t_eoneemav;    /* lsb=12800/256,unit=rpm :¸‰Î¶³İÄ‚Ì•½‹Ï´İ¼Şİ‰ñ“]” */
+
+    u1t_eoneemav = (u1)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EONEEMAV_U1_ID, (void *)&u1t_eoneemav );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( u1t_eoneemav );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u1g_emfng_eoklsmemav( )                          */
+/*  ˆ—“à—e      | sê’²¸RAM ¸‰Î¶³İÄ‚Ì•½‹Ï•‰‰× æ“¾ŠÖ”        */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ¸‰Î¶³İÄ‚Ì•½‹Ï•‰‰× lsb=320/256,unit=%          */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u1
+u1g_emfng_eoklsmemav( void )
+{
+    u1 u1t_eoklsmemav;      /* lsb=320/256,unit=% :¸‰Î¶³İÄ‚Ì•½‹Ï•‰‰× */
+
+    u1t_eoklsmemav = (u1)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOKLSMEMAV_U1_ID, (void *)&u1t_eoklsmemav );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( u1t_eoklsmemav );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u1g_emfng_eocjmfneemi( )                         */
+/*  ˆ—“à—e      | sê’²¸RAM ¸‰Î¶³İÄ‚Ì±²ÄŞÙÓ°ÄŞ‰ñ” æ“¾ŠÖ”   */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ¸‰Î¶³İÄ‚Ì±²ÄŞÙÓ°ÄŞ‰ñ” lsb=1,unit=‰ñ          */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u1
+u1g_emfng_eocjmfneemi( void )
+{
+    u1 u1t_eocjmfneemi;     /* lsb=1,unit=‰ñ :¸‰Î¶³İÄ‚Ì±²ÄŞÙÓ°ÄŞ‰ñ” */
+
+    u1t_eocjmfneemi = (u1)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOCJMFNEEMI_U1_ID, (void *)&u1t_eocjmfneemi );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( u1t_eocjmfneemi );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u1g_emfng_eocjmfneeml( )                         */
+/*  ˆ—“à—e      | sê’²¸RAM ¸‰Î¶³İÄ‚ÌÛ°Ó°ÄŞ‰ñ” æ“¾ŠÖ”      */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ¸‰Î¶³İÄ‚ÌÛ°Ó°ÄŞ‰ñ” lsb=1,unit=‰ñ             */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u1
+u1g_emfng_eocjmfneeml( void )
+{
+    u1 u1t_eocjmfneeml;     /* lsb=1,unit=‰ñ :¸‰Î¶³İÄ‚ÌÛ°Ó°ÄŞ‰ñ” */
+
+    u1t_eocjmfneeml = (u1)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOCJMFNEEML_U1_ID, (void *)&u1t_eocjmfneeml );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( u1t_eocjmfneeml );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u1g_emfng_eocjmfneemh( )                         */
+/*  ˆ—“à—e      | sê’²¸RAM ¸‰Î¶³İÄ‚ÌÊ²Ó°ÄŞ‰ñ” æ“¾ŠÖ”      */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ¸‰Î¶³İÄ‚ÌÊ²Ó°ÄŞ‰ñ” lsb=1,unit=‰ñ             */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u1
+u1g_emfng_eocjmfneemh( void )
+{
+    u1 u1t_eocjmfneemh;     /* lsb=1,unit=‰ñ :¸‰Î¶³İÄ‚ÌÊ²Ó°ÄŞ‰ñ” */
+
+    u1t_eocjmfneemh = (u1)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOCJMFNEEMH_U1_ID, (void *)&u1t_eocjmfneemh );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( u1t_eocjmfneemh );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u1g_emfng_eocdmfaotmx( )                         */
+/*  ˆ—“à—e      | sê’²¸RAM 200rev’†¸‰Î¶³İÀ‚ÌÅ‘å’l æ“¾ŠÖ”    */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | 200rev’†¸‰Î¶³İÀ‚ÌÅ‘å’l lsb=1,unit=‰ñ           */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u1
+u1g_emfng_eocdmfaotmx( void )
+{
+    u1 u1t_eocdmfaotmx;     /* lsb=1,unit=‰ñ :200rev’†¸‰Î¶³İÀ‚ÌÅ‘å’l */
+
+    u1t_eocdmfaotmx = (u1)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOCDMFAOTMX_U1_ID, (void *)&u1t_eocdmfaotmx );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( u1t_eocdmfaotmx );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u1g_emfng_eocjrevot( )                           */
+/*  ˆ—“à—e      | sê’²¸RAM Å‘å¸‰Î¶³İÀXV‚Ì1000rev‰ñ” æ“¾ŠÖ” */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | Å‘å¸‰Î¶³İÀXV‚Ì1000rev‰ñ” lsb=1,unit=‰ñ    */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+u1
+u1g_emfng_eocjrevot( void )
+{
+    u1 u1t_eocjrevot;       /* lsb=1,unit=‰ñ :Å‘å¸‰Î¶³İÀXV‚Ì1000rev‰ñ” */
+
+    u1t_eocjrevot = (u1)0U;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOCJREVOT_U1_ID, (void *)&u1t_eocjrevot );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( u1t_eocjrevot );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | s1g_emfng_eothwot( )                             */
+/*  ˆ—“à—e      | sê’²¸RAM Å‘å¸‰Î¶³İÀXV‚Ì…‰· æ“¾ŠÖ”    */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | Å‘å¸‰Î¶³İÀXV‚Ì…‰· lsb=160/128,unit=     */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+s1
+s1g_emfng_eothwot( void )
+{
+    s1 s1t_eothwot;     /* lsb=160/128,unit= :Å‘å¸‰Î¶³İÀXV‚Ì…‰· */
+
+    s1t_eothwot = (s1)0;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOTHWOT_S1_ID, (void *)&s1t_eothwot );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( s1t_eothwot );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | s1g_emfng_eothaot( )                             */
+/*  ˆ—“à—e      | sê’²¸RAM Å‘å¸‰Î¶³İÀXV‚Ì‹z‹C‰· æ“¾ŠÖ”  */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | Å‘å¸‰Î¶³İÀXV‚Ì‹z‹C‰· lsb=160/128,unit=   */
+/*  ’ˆÓ–€      | ysê’²¸–³z‚Í0‚ğ•Ô‚·                        */
+/*********************************************************************/
+s1
+s1g_emfng_eothaot( void )
+{
+    s1 s1t_eothaot;     /* lsb=160/128,unit= :Å‘å¸‰Î¶³İÀXV‚Ì‹z‹C‰· */
+
+    s1t_eothaot = (s1)0;  /*ysê’²¸–³z‚Í0ŒÅ’è */
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    (void)s4g_ememctr_read( u2g_EMFNG_EOTHAOT_S1_ID, (void *)&s1t_eothaot );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    return( s1t_eothaot );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | u1s_emfng_wxreqclr( )                            */
+/*  ˆ—“à—e      | sê’²¸RAMÁ‹ˆ—                              */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| 65ms–ˆ(emfng_65msl()‚æ‚èƒR[ƒ‹)                  */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ƒ_ƒCƒAƒO‚©‚ç‚ÌÁ‹—v‹(ON:Á‹—v‹—L‚è)          */
+/*  ’ˆÓ–€      | “à•”ŠÖ”                                         */
+/*********************************************************************/
+static u1
+u1s_emfng_wxreqclr( void )
+{
+    u1 u1t_xreqclr;
+    s4 s4t_i;
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+    u2 u2t_EOCMFMLTH_MI_c;        /* lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î‰ñ”(‘å)‚Ì•p“x ‰Šú’l */
+    u2 u2t_EOCMFMLTL_MI_c;        /* lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î‰ñ”(¬)‚Ì•p“x ‰Šú’l */
+    u1 u1t_EONEMFMLT_MI_c;        /* lsb=200/8,unit=rpm :‘ÎŒü‹C“›¸‰Î‚ÌƒGƒ“ƒWƒ“‰ñ“]‚È‚Ü‚µ’l ‰Šú’l */
+    u2 u2t_EOCMFNH_MI_c;          /* lsb=1,unit=‰ñ :¸‰Î‰ñ”(‘å)‚Ì•p“x ‰Šú’l */
+    u2 u2t_EOCMFNM_MI_c;          /* lsb=1,unit=‰ñ :¸‰Î‰ñ”(’†)‚Ì•p“x ‰Šú’l */
+    u2 u2t_EOCMFNL_MI_c;          /* lsb=1,unit=‰ñ :¸‰Î‰ñ”(¬)‚Ì•p“x ‰Šú’l */
+    u1 u1t_EOCDMFAE2MX_MI_c;      /* lsb=1,unit=‰ñ :1000rev’†¸‰ÎƒJƒEƒ“ƒ^‚ÌÅ‘å’l ‰Šú’l */
+    u1 u1t_EOCJREVEM_MI_c;        /* lsb=1,unit=‰ñ :Å‘å¸‰ÎƒJƒEƒ“ƒ^XV‚Ì1000rev‰ñ” ‰Šú’l */
+    s1 s1t_EOTHWEM_MI_c;          /* lsb=160/128,unit= :Å‘å¸‰ÎƒJƒEƒ“ƒ^XV‚Ì…‰· ‰Šú’l */
+    s1 s1t_EOTHAEM_MI_c;          /* lsb=160/128,unit= :Å‘å¸‰ÎƒJƒEƒ“ƒ^XV‚Ì‹z‹C‰· ‰Šú’l */
+    u1 u1t_EOCDMFEM2MX_MI_c;      /* lsb=1,unit=‰ñ :Å‘å¸‰ÎƒJƒEƒ“ƒ^XV‚Ì‹C“›•Ê¸‰ÎƒJƒEƒ“ƒ^ ‰Šú’l */
+    u1 u1t_EOSPDEMAV_MI_c;        /* lsb=256/256,unit=km/h :¸‰ÎƒJƒEƒ“ƒg‚Ì•½‹ÏÔ‘¬ ‰Šú’l */
+    u1 u1t_EONEEMAV_MI_c;         /* lsb=12800/256,unit=rpm :¸‰ÎƒJƒEƒ“ƒg‚Ì•½‹ÏƒGƒ“ƒWƒ“‰ñ“]” ‰Šú’l */
+    u1 u1t_EOKLSMEMAV_MI_c;       /* lsb=320/256,unit=% :¸‰ÎƒJƒEƒ“ƒg‚Ì•½‹Ï•‰‰× ‰Šú’l */
+    u1 u1t_EOCJMFNEEMI_MI_c;      /* lsb=1,unit=‰ñ :¸‰ÎƒJƒEƒ“ƒg‚ÌƒAƒCƒhƒ‹ƒ‚[ƒh‰ñ” ‰Šú’l */
+    u1 u1t_EOCJMFNEEML_MI_c;      /* lsb=1,unit=‰ñ :¸‰ÎƒJƒEƒ“ƒg‚Ìƒ[ƒ‚[ƒh‰ñ” ‰Šú’l */
+    u1 u1t_EOCJMFNEEMH_MI_c;      /* lsb=1,unit=‰ñ :¸‰ÎƒJƒEƒ“ƒg‚ÌƒnƒCƒ‚[ƒh‰ñ” ‰Šú’l */
+    u1 u1t_EOCDMFAOTMX_MI_c;      /* lsb=1,unit=‰ñ :200rev’†Å‘åƒJƒEƒ“ƒ^Å‘å’l  ‰Šú’l */
+    u1 u1t_EOCJREVOT_MI_c;        /* lsb=1,unit=‰ñ :Å‘å¸‰ÎƒJƒEƒ“ƒ^XV‚Ì1000rev‰ñ” ‰Šú’l */
+    s1 s1t_EOTHWOT_MI_c;          /* lsb=160/128,unit= :Å‘å¸‰ÎƒJƒEƒ“ƒ^XV‚Ì…‰· ‰Šú’l */
+    s1 s1t_EOTHAOT_MI_c;          /* lsb=160/128,unit= :Å‘å¸‰ÎƒJƒEƒ“ƒ^XV‚Ì‹z‹C‰· ‰Šú’l */
+#endif
+    u2 u2t_ECDMFAEMTV_MI_c;       /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p¡ƒgƒŠƒbƒv—İÏ¸‰ÎƒJƒEƒ“ƒ^(‘S‹C“›)‰Šú’l */
+    u2 u2t_ECDMFAEMMNTL_MI_c;     /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p¡ƒgƒŠƒbƒv—İÏ¸‰ÎƒJƒEƒ“ƒ^‰ºŒÀ’l(‘S‹C“›)‰Šú’l */
+    u2 u2t_ECDMFAEMMXTL_MI_c;     /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p¡ƒgƒŠƒbƒv—İÏ¸‰ÎƒJƒEƒ“ƒ^ãŒÀ’l(‘S‹C“›)‰Šú’l */
+    u2 u2t_ECDMFAAVTV_MI_c;       /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p‰ß‹10ƒgƒŠƒbƒvEWMA¸‰ÎƒJƒEƒ“ƒ^(‘S‹C“›)‰Šú’l */
+    u2 u2t_ECDMFAAVMNTL_MI_c;     /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p‰ß‹10ƒgƒŠƒbƒvEWMA¸‰ÎƒJƒEƒ“ƒ^‰ºŒÀ’l(‘S‹C“›)‰Šú’l */
+    u2 u2t_ECDMFAAVMXTL_MI_c;     /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p‰ß‹10ƒgƒŠƒbƒvEWMA¸‰ÎƒJƒEƒ“ƒ^ãŒÀ’l(‘S‹C“›)‰Šú’l */
+    u2 u2t_ECDMFEMTV_MI_c;        /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p¡ƒgƒŠƒbƒv—İÏ¸‰ÎƒJƒEƒ“ƒ^(‹C“›•Ê)‰Šú’l */
+    u2 u2t_ECDMFEMMNTL_MI_c;      /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p¡ƒgƒŠƒbƒv—İÏ¸‰ÎƒJƒEƒ“ƒ^‰ºŒÀ’l(‹C“›•Ê)‰Šú’l */
+    u2 u2t_ECDMFEMMXTL_MI_c;      /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p¡ƒgƒŠƒbƒv—İÏ¸‰ÎƒJƒEƒ“ƒ^ãŒÀ’l(‹C“›•Ê)‰Šú’l */
+    u2 u2t_ECDMFAVTV_MI_c;        /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p‰ß‹10ƒgƒŠƒbƒvEWMA¸‰ÎƒJƒEƒ“ƒ^(‹C“›•Ê)‰Šú’l */
+    u2 u2t_ECDMFAVMNTL_MI_c;      /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p‰ß‹10ƒgƒŠƒbƒvEWMA¸‰ÎƒJƒEƒ“ƒ^‰ºŒÀ’l(‹C“›•Ê)‰Šú’l */
+    u2 u2t_ECDMFAVMXTL_MI_c;      /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p‰ß‹10ƒgƒŠƒbƒvEWMA¸‰ÎƒJƒEƒ“ƒ^ãŒÀ’l(‹C“›•Ê)‰Šú’l */
+    u1 u1t_ncyl_c;                /* lsb=1 :‹C“›” */
+
+    /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+    u1t_xreqclr = u1s_emfng_xreqclr_Lch;
+
+    if ( u1t_xreqclr == (u1)ON )
+    {
+        u1t_ncyl_c = u1g_ejcc_NCYL;
+#if JEOOBD == u1g_EJCC_USE        /*ysê’²¸—Lz*/
+        u2t_EOCMFMLTH_MI_c = u2g_emfng_EOCMFMLTH_MI;
+        u2t_EOCMFMLTL_MI_c = u2g_emfng_EOCMFMLTL_MI;
+        u1t_EONEMFMLT_MI_c = u1g_emfng_EONEMFMLT_MI;
+        u2t_EOCMFNH_MI_c = u2g_emfng_EOCMFNH_MI;
+        u2t_EOCMFNM_MI_c = u2g_emfng_EOCMFNM_MI;
+        u2t_EOCMFNL_MI_c = u2g_emfng_EOCMFNL_MI;
+        u1t_EOCDMFAE2MX_MI_c = u1g_emfng_EOCDMFAE2MX_MI;
+        u1t_EOCJREVEM_MI_c = u1g_emfng_EOCJREVEM_MI;
+        s1t_EOTHWEM_MI_c = s1g_emfng_EOTHWEM_MI;
+        s1t_EOTHAEM_MI_c = s1g_emfng_EOTHAEM_MI;
+        u1t_EOCDMFEM2MX_MI_c = u1g_emfng_EOCDMFEM2MX_MI;
+        u1t_EOSPDEMAV_MI_c = u1g_emfng_EOSPDEMAV_MI;
+        u1t_EONEEMAV_MI_c = u1g_emfng_EONEEMAV_MI;
+        u1t_EOKLSMEMAV_MI_c = u1g_emfng_EOKLSMEMAV_MI;
+        u1t_EOCJMFNEEMI_MI_c = u1g_emfng_EOCJMFNEEMI_MI;
+        u1t_EOCJMFNEEML_MI_c = u1g_emfng_EOCJMFNEEML_MI;
+        u1t_EOCJMFNEEMH_MI_c = u1g_emfng_EOCJMFNEEMH_MI;
+        u1t_EOCDMFAOTMX_MI_c = u1g_emfng_EOCDMFAOTMX_MI;
+        u1t_EOCJREVOT_MI_c = u1g_emfng_EOCJREVOT_MI;
+        s1t_EOTHWOT_MI_c = s1g_emfng_EOTHWOT_MI;
+        s1t_EOTHAOT_MI_c = s1g_emfng_EOTHAOT_MI;
+
+        /* sê’²¸RAMÁ‹ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCMFMLTH_U2_ID, (void *)&u2t_EOCMFMLTH_MI_c );           /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCMFMLTL_U2_ID, (void *)&u2t_EOCMFMLTL_MI_c );           /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EONEMFMLT_U1_ID, (void *)&u1t_EONEMFMLT_MI_c );           /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCMFNH_U2_ID,   (void *)&u2t_EOCMFNH_MI_c );             /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCMFNM_U2_ID,   (void *)&u2t_EOCMFNM_MI_c );             /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCMFNL_U2_ID,   (void *)&u2t_EOCMFNL_MI_c );             /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCDMFAE2MX_U1_ID, (void *)&u1t_EOCDMFAE2MX_MI_c );       /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCJREVEM_U1_ID, (void *)&u1t_EOCJREVEM_MI_c );           /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOTHWEM_S1_ID, (void *)&s1t_EOTHWEM_MI_c );               /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOTHAEM_S1_ID, (void *)&s1t_EOTHAEM_MI_c );               /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncyl_c; s4t_i++ )
+        {
+            (void)s4g_ememctr_write( u2s_EOCDMFEM2MX_U1_ID[s4t_i], (void *)&u1t_EOCDMFEM2MX_MI_c );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        }
+        (void)s4g_ememctr_write( u2g_EMFNG_EOSPDEMAV_U1_ID, (void *)&u1t_EOSPDEMAV_MI_c );           /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EONEEMAV_U1_ID, (void *)&u1t_EONEEMAV_MI_c );             /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOKLSMEMAV_U1_ID, (void *)&u1t_EOKLSMEMAV_MI_c );         /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCJMFNEEMI_U1_ID, (void *)&u1t_EOCJMFNEEMI_MI_c );       /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCJMFNEEML_U1_ID, (void *)&u1t_EOCJMFNEEML_MI_c );       /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCJMFNEEMH_U1_ID, (void *)&u1t_EOCJMFNEEMH_MI_c );       /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCDMFAOTMX_U1_ID, (void *)&u1t_EOCDMFAOTMX_MI_c );       /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOCJREVOT_U1_ID, (void *)&u1t_EOCJREVOT_MI_c );           /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOTHWOT_S1_ID, (void *)&s1t_EOTHWOT_MI_c );               /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_EOTHAOT_S1_ID, (void *)&s1t_EOTHAOT_MI_c );               /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+        /* mode$06‘Î‰¸‰ÎƒJƒEƒ“ƒ^Á‹ */
+        u2t_ECDMFAEMTV_MI_c = u2g_emfng_ECDMFAEMTV_MI;
+        u2t_ECDMFAEMMNTL_MI_c = u2g_emfng_ECDMFAEMMNTL_MI;
+        u2t_ECDMFAEMMXTL_MI_c = u2g_emfng_ECDMFAEMMXTL_MI;
+        u2t_ECDMFAAVTV_MI_c = u2g_emfng_ECDMFAAVTV_MI;
+        u2t_ECDMFAAVMNTL_MI_c = u2g_emfng_ECDMFAAVMNTL_MI;
+        u2t_ECDMFAAVMXTL_MI_c = u2g_emfng_ECDMFAAVMXTL_MI;
+        u2t_ECDMFEMTV_MI_c = u2g_emfng_ECDMFEMTV_MI;
+        u2t_ECDMFEMMNTL_MI_c = u2g_emfng_ECDMFEMMNTL_MI;
+        u2t_ECDMFEMMXTL_MI_c = u2g_emfng_ECDMFEMMXTL_MI;
+        u2t_ECDMFAVTV_MI_c = u2g_emfng_ECDMFAVTV_MI;
+        u2t_ECDMFAVMNTL_MI_c = u2g_emfng_ECDMFAVMNTL_MI;
+        u2t_ECDMFAVMXTL_MI_c = u2g_emfng_ECDMFAVMXTL_MI;
+
+        (void)s4g_ememctr_write( u2g_EMFNG_ECDMFAEMTV_U2_ID, (void *)&u2t_ECDMFAEMTV_MI_c );         /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_ECDMFAEMMNTL_U2_ID, (void *)&u2t_ECDMFAEMMNTL_MI_c );     /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_ECDMFAEMMXTL_U2_ID, (void *)&u2t_ECDMFAEMMXTL_MI_c );     /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_ECDMFAAVTV_U2_ID, (void *)&u2t_ECDMFAAVTV_MI_c );         /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_ECDMFAAVMNTL_U2_ID, (void *)&u2t_ECDMFAAVMNTL_MI_c );     /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        (void)s4g_ememctr_write( u2g_EMFNG_ECDMFAAVMXTL_U2_ID, (void *)&u2t_ECDMFAAVMXTL_MI_c );     /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+
+        for ( s4t_i = (s4)0 ; s4t_i < (s4)u1t_ncyl_c ; s4t_i++ )
+        {
+            (void)s4g_ememctr_write( u2s_ECDMFEMTV_U2_ID[s4t_i], (void *)&u2t_ECDMFEMTV_MI_c );      /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+            (void)s4g_ememctr_write( u2s_ECDMFEMMNTL_U2_ID[s4t_i], (void *)&u2t_ECDMFEMMNTL_MI_c );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+            (void)s4g_ememctr_write( u2s_ECDMFEMMXTL_U2_ID[s4t_i], (void *)&u2t_ECDMFEMMXTL_MI_c );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+            (void)s4g_ememctr_write( u2s_ECDMFAVTV_U2_ID[s4t_i], (void *)&u2t_ECDMFAVTV_MI_c );      /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+            (void)s4g_ememctr_write( u2s_ECDMFAVMNTL_U2_ID[s4t_i], (void *)&u2t_ECDMFAVMNTL_MI_c );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+            (void)s4g_ememctr_write( u2s_ECDMFAVMXTL_U2_ID[s4t_i], (void *)&u2t_ECDMFAVMXTL_MI_c );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        }
+        /* u2g_EMFNG_EXRCDMF_U1_ID‚ÍƒNƒŠƒA•s—v */
+    }
+    return( u1t_xreqclr );
+}
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_emode06_cal( )                             */
+/*  ˆ—“à—e      | mode$06‘Î‰¸‰Î¶³İÀ‚Ì‘€ì                        */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| emfng_65msl( )                                   */
+/*  ˆø”          | ‚È‚µ                                             */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      | “à•”ŠÖ”                                         */
+/*********************************************************************/
+static void
+emfng_emode06_cal( void )
+{
+#pragma ghs startdata
+#if ( JENCYL == u1g_EJCC_6CYL )      /*y6‹C“›z*/
+ #if ( JEEGTYPE == u1g_EJCC_V6CYL )   /*yV6z*/
+    /*-----------------------------------------------------------------*/
+    /*                         t_cyl=0,    1,    2,    3,    4,    5   */
+    /* u1s_emfng_CYLMODTBL[t_cyl] ¨ 1,    2,    0,    1,    2,    0   */
+    /*                              #1#4, #2#5, #3#6, #1#4, #2#5, #3#6 */
+    /*-----------------------------------------------------------------*/
+    static volatile const u1 u1s_emfng_CYLMODTBL[u1g_EJCC_NCYL] =        /* :‹C“›ŒQ(ecdmfw[]) ¨ ‹C“›•ÏŠ·ƒe[ƒuƒ‹  */
+    { (u1)1U, (u1)2U, (u1)0U, (u1)1U, (u1)2U, (u1)0U };                  /* #3#6, #1#4, #2#5  ¨ #1,#2,#3,#4,#5,#6 */
+ #endif
+ #if ( JEEGTYPE == u1g_EJCC_L6CYL )   /*yL6z*/
+    /*-----------------------------------------------------------------*/
+    /*                         t_cyl=0,    1,    2,    3,    4,    5   */
+    /* u1s_emfng_CYLMODTBL[t_cyl] ¨ 1,    2,    0,    0,    2,    1   */
+    /*                              #1#6, #2#5, #3#4, #3#4, #2#5, #1#6 */
+    /*-----------------------------------------------------------------*/
+    static volatile const u1 u1s_emfng_CYLMODTBL[u1g_EJCC_NCYL] =        /* :‹C“›ŒQ(ecdmfw[]) ¨ ‹C“›•ÏŠ·ƒe[ƒuƒ‹  */
+    { (u1)1U, (u1)2U, (u1)0U, (u1)0U, (u1)2U, (u1)1U };                  /* #3#4, #1#6, #2#5  ¨ #1,#2,#3,#4,#5,#6 */
+ #endif
+ #if ( JEEGTYPE == u1g_EJCC_V6CYL )   /*yV6z*/
+    static volatile const u1 u1s_emfng_CYLWTBL[2][3] = /* :‹C“›ŒQ(t_cylw) ¨ ‹C“›•ÏŠ·ƒe[ƒuƒ‹  */
+    {{ (u1)2U, (u1)0U, (u1)1U },              /* #3, #1, #2 */
+     { (u1)5U, (u1)3U, (u1)4U }};             /* #6, #4, #5 */
+ #elif ( JEEGTYPE == u1g_EJCC_L6CYL ) /*yL6z*/
+    static volatile const u1 u1s_emfng_CYLWTBL[2][3] = /* :‹C“›ŒQ(t_cylw) ¨ ‹C“›•ÏŠ·ƒe[ƒuƒ‹  */
+    {{ (u1)2U, (u1)0U, (u1)1U },              /* #3, #1, #2 */
+     { (u1)3U, (u1)5U, (u1)4U }};             /* #4, #6, #5 */
+ #endif
+#endif
+#pragma ghs enddata
+
+    s4  s4t_ecdmfaemTv;     /* Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‘S‹C“›) */
+    u2  u2t_ecdmfaemTv;     /* Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‘S‹C“›)(‘‚«‚İ—p) */
+    u2  u2t_ECDMFAEMMNTL_MI_c;  /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p¡ƒgƒŠƒbƒv—İÏ¸‰ÎƒJƒEƒ“ƒ^‰ºŒÀ’l(‘S‹C“›)‰Šú’l */
+    u2  u2t_ecdmfaemMxtl;   /* Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‘S‹C“›)(‘‚«‚İ—p) */
+    s4  s4t_ecdmfaemTvo;    /* Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‘S‹C“›)(‘O‰ñ’l) */
+    s4  s4t_ecdmfemTv;      /* Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‹C“›•Ê) */
+    u2  u2t_ecdmfemTv;      /* Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‹C“›•Ê)(‘‚«‚İ—p) */
+    u2  u2t_ECDMFEMMNTL_MI_c;   /* lsb=1,unit=‰ñ :ƒeƒXƒgŒ‹‰Êo—Í—p¡ƒgƒŠƒbƒv—İÏ¸‰ÎƒJƒEƒ“ƒ^‰ºŒÀ’l(‹C“›•Ê)‰Šú’l */
+    u2  u2t_ecdmfemMxtl;    /* Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‹C“›•Ê)(‘‚«‚İ—p) */
+    s4  s4t_cyl;
+    s4  s4t_cdmfwa;         /* lsb=1,unit=‰ñ:‘ÎŒü‹C“›¸‰ÎƒJƒEƒ“ƒ^ÏZ’l */
+#if JENCYL == u1g_EJCC_6CYL     /*y6‹C“›z*/
+    s4  s4t_i;              /* lsb=1 :forƒ‹[ƒv•Ï” */
+    u1  u1t_tblidx;         /* :‹C“›ŒQ(ecdmfw[]) ¨ ‹C“›•ÏŠ·Ã°ÌŞÙ æ“¾’l */
+    s4  s4t_cdmfwtmp;       /* lsb=1,unit=‰ñ:‹C“›•Ê¸‰ÎƒJƒEƒ“ƒ^‚Ì‹C“›ŒQ‡Œv’l */
+    s4  s4t_ecdmfw2;        /* lsb=1,unit=‰ñ:‘ÎŒü‹C“›¸‰Î¶³İÀ(‰‰Z’l) */
+    s4  s4t_cdmfemTvtmp[u1g_EJCC_NCYL/2];   /*  lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰ÎƒJƒEƒ“ƒ^‚Ì‚P‹C“›‚ ‚½‚è¸‰Î‰ñ” */
+    s4  s4t_ecdmfw;         /* lsb=1,unit=‰ñ :‘ÎŒü‹C“›¸‰Î¶³İÀ */
+    u1  u1t_excdmfw;        /* lsb=1 :‘ÎŒü‹C“›¸‰Î”»’è¬—§Ì×¸Ş */
+    u1  u1t_idx1;           /* lsb=1 :‹C“›ŒQ->‹C“›1•ÏŠ·—pÜ°¸•Ï” */
+    u1  u1t_idx2;           /* lsb=1 :‹C“›ŒQ->‹C“›2•ÏŠ·—pÜ°¸•Ï” */
+    u1 u1t_ncylw_c;         /* lsb=1 :‹C“›ŒQ” */
+#endif
+    s4  s4t_ecdmfem[u1g_EJCC_NCYL];         /* lsb=1,unit=‰ñ:EMˆ«‰»ÚÍŞÙ‹C“›•Ê¸‰Î¶³İÀ */
+#if ( JETCORE_D == u1g_EJCC_USE ) && ( JEOBDUDS_D == u1g_EJCC_NOT_USE )                            /*yt-CORE‘Î‰—LzANDyOBDonUDS‘Î‰–³z*/
+    u2  u2t_ecdmfaemTv_get; /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‘S‹C“›)(–ß‚è’læ“¾—p) */
+    u2  u2t_ecdmfaemMntl_get;  /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ‰ºŒÀ’l(‘S‹C“›)(–ß‚è’læ“¾—p) */
+    u2  u2t_ecdmfaemMxtl_get;  /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀãŒÀ’l(‘S‹C“›)(–ß‚è’læ“¾—p) */
+    u2  u2t_dtrid;          /* lsb=1 :Ã½ÄŒ‹‰Êo—Í‚h‚c */
+    u2  u2t_ecdmfemTv_get;  /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‹C“›•Ê)(–ß‚è’læ“¾—p) */
+    u2  u2t_ecdmfemMntl_get;   /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ‰ºŒÀ’l(‹C“›•Ê)(–ß‚è’læ“¾—p) */
+    u2  u2t_ecdmfemMxtl_get;   /* lsb=1,unit=‰ñ :Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀãŒÀ’l(‹C“›•Ê)(–ß‚è’læ“¾—p) */
+#endif
+    u1  u1t_ncyl_c;         /* lsb=1 :‹C“›” */
+
+    /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+    u1t_ncyl_c = u1g_ejcc_NCYL;
+    s4t_ecdmfem[0] = (s4)u1g_emfng_ecdmfem[0];
+    for ( s4t_cyl = (s4)1; s4t_cyl < (s4)u1t_ncyl_c; s4t_cyl++ )
+    {
+        s4t_ecdmfem[s4t_cyl] = (s4)u1g_emfng_ecdmfem[s4t_cyl];
+    }
+    u2t_ECDMFAEMMNTL_MI_c = u2g_emfng_ECDMFAEMMNTL_MI;
+    u2t_ECDMFEMMNTL_MI_c = u2g_emfng_ECDMFEMMNTL_MI;
+
+    /**************************/
+    /* ‹C“›ŒQ‚Ì‘¸‰Î‰ñ”Zo */
+    /**************************/
+    s4t_cdmfwa = (s4)0;
+#if JENCYL == u1g_EJCC_6CYL     /*y6‹C“›z*/
+    u1t_excdmfw = (u1)big_emfng_excdmfw;
+    s4t_cdmfemTvtmp[0] = (s4)0; /* ÀŞĞ°İ’è(Áª¯¶Œx‰ñ”ğ) */
+    u1t_ncylw_c = u1s_EMFNG_NCYLW;
+    for ( s4t_i = (s4)0; s4t_i < (s4)u1t_ncylw_c ; s4t_i++  )
+    {
+        s4t_cdmfemTvtmp[s4t_i] = (s4)0;
+
+        if ( u1t_excdmfw == (u1)ON )                      /* ‘ÎŒü‹C“›¸‰Î */
+        {
+            s4t_ecdmfw = (s4)u1g_emfng_ecdmfw[s4t_i];
+
+            u1t_idx1 = u1s_emfng_CYLWTBL[0][s4t_i];
+            u1t_idx2 = u1s_emfng_CYLWTBL[1][s4t_i];
+
+            s4t_cdmfwtmp =  s4t_ecdmfem[u1t_idx1];  /* ”»’è‹C“›ŒQ‚Ì‹C“›1 */
+            s4t_cdmfwtmp += s4t_ecdmfem[u1t_idx2];  /* ”»’è‹C“›ŒQ‚Ì‹C“›2 */
+
+            s4t_ecdmfw2 = (s4)s2g_glmulst_s2s2u2( (s2)s4t_ecdmfw, s2s_emfng_KCDMFWL, (u2)13U );   /* lsb=1*(2/64/256) -> 1 */
+            if ( s4t_cdmfwtmp < s4t_ecdmfw2 )
+            {
+                s4t_cdmfwa += s4t_ecdmfw;
+                /* ‘ÎŒü‹C“›—p‚ÌƒJƒEƒ“ƒ^‚ª‘S‚Ä255‰ñ‚Å‚àƒI[ƒo[ƒtƒ[‚È‚µ  */
+                s4t_cdmfemTvtmp[s4t_i] = s4g_glbitcal_s4sftr_s4u1( s4t_ecdmfw, (u1)1U );     /* (ecdmfw[]‚ÌŠY“–‹C“›•ª)€‚Q */
+            }
+        }
+    }
+#endif
+
+    /* ecdmfaem‘O‰ñ’l */
+    s4t_ecdmfaemTvo = (s4)u2g_emfng_ecdmfaemTv();
+
+    /************************************/
+    /* ‘S‹C“›¸‰Î‰ñ”(ecdmfaemTv)‚ÌZo */
+    /************************************/
+    s4t_ecdmfaemTv = s4t_ecdmfaemTvo            /* ‘O‰ñ’l */
+                  + s4t_cdmfwa                  /* + EMFCNT_OPPS‚Ì¸‰Î‰ñ”y6‹C“›z*/
+                  + (s4)s2s_emfng_ecdmfaotb;    /* + (ecdmfaot - (ecdtmf2 * KCDTMFAOTB)) */
+
+    /* ã‰ºŒÀƒK[ƒhˆ— */
+    ELIB_HILOGD2( s4t_ecdmfaemTv, (s4)u2g_U2MAX, s4t_ecdmfaemTvo, s4t_ecdmfaemTv );
+    u2t_ecdmfaemTv = (u2)s4t_ecdmfaemTv;
+
+    /* Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‘S‹C“›) */
+    (void)s4g_ememctr_write( u2g_EMFNG_ECDMFAEMTV_U2_ID, (void *)&u2t_ecdmfaemTv );                /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+    /* Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ‰ºŒÀ’l(‘S‹C“›) */
+    (void)s4g_ememctr_write( u2g_EMFNG_ECDMFAEMMNTL_U2_ID, (void *)&u2t_ECDMFAEMMNTL_MI_c );       /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+    /* Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀãŒÀ’l(‘S‹C“›) */
+    u2t_ecdmfaemMxtl = (u2)0xffffU;
+    (void)s4g_ememctr_write( u2g_EMFNG_ECDMFAEMMXTL_U2_ID, (void *)&u2t_ecdmfaemMxtl );            /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#if ( JETCORE_D == u1g_EJCC_USE ) && ( JEOBDUDS_D == u1g_EJCC_NOT_USE )                            /*yt-CORE‘Î‰—LzANDyOBDonUDS‘Î‰–³z*/
+    u2t_ecdmfaemTv_get   = u2g_emfng_ecdmfaemTv();
+    u2t_ecdmfaemMntl_get = u2g_emfng_ecdmfaemMntl();
+    u2t_ecdmfaemMxtl_get = u2g_emfng_ecdmfaemMxtl();
+    (void)u1g_wtcif_dem_setdtr_u2s4s4s4u1( u2g_WTCIF_DEM_DTR_ECDMFAEM, (s4)u2t_ecdmfaemTv_get, (s4)u2t_ecdmfaemMntl_get, (s4)u2t_ecdmfaemMxtl_get, u1g_WTCIF_DEM_DTR_CTL_NORMAL );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+
+    /**************************************************/
+    /* Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‹C“›•Ê)‚ÌZo */
+    /**************************************************/
+    for ( s4t_cyl = (s4)0; s4t_cyl < (s4)u1t_ncyl_c ; s4t_cyl++ )
+    {
+#if JENCYL == u1g_EJCC_6CYL     /*y6‹C“›z*/
+        u1t_tblidx = u1s_emfng_CYLMODTBL[ s4t_cyl ];
+
+        /* ‘ÎŒü‹C“›•ª */
+        s4t_ecdmfemTv = s4t_cdmfemTvtmp[u1t_tblidx];
+
+        s4t_ecdmfemTv += (s4)u2g_emfng_ecdmfemTv( (u1)s4t_cyl );
+#else                           /*y6‹C“›ˆÈŠOz*/
+        s4t_ecdmfemTv = (s4)u2g_emfng_ecdmfemTv( (u1)s4t_cyl );
+#endif
+        /* Še‹C“›‚²‚Æ‚Ì¸‰Î‰ñ” */
+        s4t_ecdmfemTv += s4t_ecdmfem[s4t_cyl];
+
+        /* ãŒÀƒK[ƒhˆ— */
+        ELIB_HIGHGD2( s4t_ecdmfemTv,(s4)u2g_U2MAX, s4t_ecdmfemTv );
+        u2t_ecdmfemTv = (u2)s4t_ecdmfemTv;
+
+        /* Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ(‹C“›•Ê) */
+        (void)s4g_ememctr_write( u2s_ECDMFEMTV_U2_ID[s4t_cyl], (void *)&u2t_ecdmfemTv );           /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        /* Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀ‰ºŒÀ’l(‹C“›•Ê) */
+        (void)s4g_ememctr_write( u2s_ECDMFEMMNTL_U2_ID[s4t_cyl], (void *)&u2t_ECDMFEMMNTL_MI_c );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+        /* Ã½ÄŒ‹‰Êo—Í—p¡ÄØ¯Ìß—İÏ¸‰Î¶³İÀãŒÀ’l(‹C“›•Ê) */
+        u2t_ecdmfemMxtl = (u2)0xffffU;
+        (void)s4g_ememctr_write( u2s_ECDMFEMMXTL_U2_ID[s4t_cyl], (void *)&u2t_ecdmfemMxtl );       /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#if ( JETCORE_D == u1g_EJCC_USE ) && ( JEOBDUDS_D == u1g_EJCC_NOT_USE )                            /*yt-CORE‘Î‰—LzANDyOBDonUDS‘Î‰–³z*/
+        u2t_dtrid = u2s_emfng_ecdmfem_tbl[s4t_cyl];
+        u2t_ecdmfemTv_get   = u2g_emfng_ecdmfemTv( (u1)s4t_cyl );
+        u2t_ecdmfemMntl_get = u2g_emfng_ecdmfemMntl( (u1)s4t_cyl );
+        u2t_ecdmfemMxtl_get = u2g_emfng_ecdmfemMxtl( (u1)s4t_cyl );
+        (void)u1g_wtcif_dem_setdtr_u2s4s4s4u1( u2t_dtrid, (s4)u2t_ecdmfemTv_get, (s4)u2t_ecdmfemMntl_get, (s4)u2t_ecdmfemMxtl_get, u1g_WTCIF_DEM_DTR_CTL_NORMAL );  /* –ß‚è’l‚Íg—p‚µ‚È‚¢ */
+#endif
+    }
+}
+
+#if JEMFFC == u1g_EJCC_USE  /*yG”}OT¸‰ÎˆÙíFC—Lz*/
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_exmfotfc_u1( )                             */
+/*  ˆ—“à—e      | FCµÌß¼®İ”»’è—pG”}OTÚÍŞÙˆÙí’Ê’mÌ×¸Ş‚Ìˆ—       */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| emfng_65msl( )                                   */
+/*  ˆø”          | u1t_flg   :lsb=1 ƒtƒ‰ƒOî•ñ                      */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      | yG”}OT¸‰ÎˆÙíFC—Lz                         */
+/*********************************************************************/
+void
+emfng_exmfotfc_u1( u1 u1t_flg )
+{
+    s4 s4t_exdmffc;   /* lsb=1:FCµÌß¼®İ”»’è—pG”}OTÚÍŞÙˆÙí’Ê’mÌ×¸Ş */
+
+    s4t_exdmffc = (s4)OFF;
+    if ( u1t_flg == (u1)ON )
+    {
+        s4t_exdmffc = (s4)ON;
+    }
+    u1g_emfng_exdmffc = (u1)s4t_exdmffc;
+}
+#endif
+
+#if JEOOBD == u1g_EJCC_USE      /*ysê’²¸—Lz*/
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_espdaemclr( )                              */
+/*  ˆ—“à—e      | sê’²¸RAM‚Ì¸Ø±                                 */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| ˆ——v‹                                       */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      | “à•”ŠÖ”ysê’²¸—Lz                           */
+/*********************************************************************/
+static void
+emfng_espdaemclr( void )
+{
+    /* ƒNƒŠƒAˆ— */
+    s4s_emfng_espdaem  = (s4)0;
+    s4s_emfng_eneaem   = (s4)0;
+    s4s_emfng_eklsmaem = (s4)0;
+    u1s_emfng_ecjmfneemi = (u1)0U;
+    u1s_emfng_ecjmfneeml = (u1)0U;
+    u1s_emfng_ecjmfneemh = (u1)0U;
+}
+#endif
+
+/*********************************************************************/
+/*  ŠÖ”–¼        | emfng_roughjdg_u1u1( )                           */
+/*  ˆ—“à—e      | ˆ«˜H”»’èŠÖ˜Aˆ—                                 */
+/*  §Œäƒ^ƒCƒ~ƒ“ƒO| TDC–ˆ(emfng_mfptn_ann_u1u1u1()‚©‚çƒR[ƒ‹)        */
+/*  ˆø”          | u1t_xmfne      :lsb=1 ¸‰Î–{”»’è                 */
+/*                | u1t_mfkind     :lsb=1 ¸‰Îí•Ê                   */
+/*  –ß‚è’l        | ‚È‚µ                                             */
+/*  ’ˆÓ–€      | “à•”ŠÖ”                                         */
+/*********************************************************************/
+static void
+emfng_roughjdg_u1u1( u1 u1t_xmfne, u1 u1t_mfkind )
+{
+#if JEMFMETHOD_D == u1g_EJCC_TIME_D    /*y¸‰Îƒ¢T–@z*/
+    static volatile s2 s2s_emfng_edltmaxlho; /* lsb=1/8,unit=us :’á‰ñ“]ˆæ‰ñ“]•Ï“®—Êƒs[ƒN’l‹L‰¯ */
+    static volatile s2 s2s_emfng_edltmaxhho; /* lsb=1/8,unit=us :‚‰ñ“]ˆæ‰ñ“]•Ï“®—Êƒs[ƒN’l‹L‰¯ */
+#endif
+#if JEMFMETHOD_D == u1g_EJCC_OMEGA_D   /*y¸‰Îƒ¢ƒÖ–@z*/
+    static volatile s2 s2s_emfng_ewmaxlo;    /* lsb=32/128/256,unit=CA/ms :’á‰ñ“]ˆæ‰ñ“]•Ï“®—Êƒs[ƒN’l‹L‰¯ */
+    static volatile s2 s2s_emfng_ewmaxho;    /* lsb=32/128/256,unit=CA/ms :‚‰ñ“]ˆæ‰ñ“]•Ï“®—Êƒs[ƒN’l‹L‰¯ */
+#endif
+
+    u2 u2t_ecdtmfwa;        /* lsb=1,unit=‰ñ :EMˆ«‰»ƒŒƒxƒ‹”»’è—pˆ«˜HƒJƒEƒ“ƒ^ */
+    u1 u1t_ecdtmf2;         /* lsb=1,unit=‰ñ :G”}OTƒŒƒxƒ‹”»’è—pˆ«˜HƒJƒEƒ“ƒ^ */
+    u1 u1t_exjtmf;          /* lsb=1 :¸‰Î‚Ì‰¼”»’è‹Ö~ƒtƒ‰ƒO */
+    u1 u1t_exjtmf2;         /* lsb=1 :¸‰Î‚Ì–{”»’è‹–‰Âƒtƒ‰ƒO */
+#if JEMFMETHOD_D == u1g_EJCC_TIME_D    /*y¸‰Îƒ¢T–@z*/
+    s2 s2t_edltmaxlo;       /* lsb=1/8,unit=us :’á‰ñ“]ˆæ‰ñ“]•Ï“®—Êƒs[ƒN’l‹L‰¯ */
+    s2 s2t_edltmaxho;       /* lsb=1/8,unit=us :‚‰ñ“]ˆæ‰ñ“]•Ï“®—Êƒs[ƒN’l‹L‰¯ */
+    s2 s2t_edltmaxl;        /* lsb=1/8,unit=us :‰ñ“]•Ï“®—Êƒs[ƒN’l(Lowƒ‚[ƒh) */
+    s2 s2t_edltmaxh;        /* lsb=1/8,unit=us :‰ñ“]•Ï“®—Êƒs[ƒN’l(Highƒ‚[ƒh) */
+#endif
+#if JEMFMETHOD_D == u1g_EJCC_OMEGA_D   /*y¸‰Îƒ¢ƒÖ–@z*/
+    s2 s2t_ewmaxlo;         /* lsb=32/128/256,unit=CA/ms :’á‰ñ“]ˆæ‰ñ“]•Ï“®—Êƒs[ƒN’l‹L‰¯ */
+    s2 s2t_ewmaxho;         /* lsb=32/128/256,unit=CA/ms :‚‰ñ“]ˆæ‰ñ“]•Ï“®—Êƒs[ƒN’l‹L‰¯ */
+    s2 s2t_ewmaxl;          /* lsb=32/128/256,unit=CA/ms :‰ñ“]•Ï“®—Êƒs[ƒN’l(Lowƒ‚[ƒh) */
+    s2 s2t_ewmaxh;          /* lsb=32/128/256,unit=CA/ms :‰ñ“]•Ï“®—Êƒs[ƒN’l(Highƒ‚[ƒh) */
+#endif
+    s2 s2t_espd;            /* lsb=256/256,unit=km/h :Ô‘¬ */
+    u1 u1t_ejmfne;          /* lsb=1 :‰ñ“]—Ìˆæ”»’è’l */
+    s2 s2t_MFSPD_c;         /* lsb=256/256,unit=km/h :‘–só‘Ô”»’è’l */
+    u1 u1t_CJPMF_c;         /* lsb=1,unit=‰ñ :ƒ[ƒƒNƒƒXƒJƒEƒ“ƒ^”»’è’l */
+
+    /* ƒ[ƒNƒf[ƒ^‰Šú‰» */
+    u1t_exjtmf = (u1)bis_emfng_exjtmf;
+    u1t_exjtmf2 = (u1)bis_emfng_exjtmf2;
+#if JEMFMETHOD_D == u1g_EJCC_TIME_D    /*y¸‰Îƒ¢T–@z*/
+    s2t_edltmaxlo = s2s_emfng_edltmaxlho;
+    s2t_edltmaxho = s2s_emfng_edltmaxhho;
+    s2t_edltmaxl = s2g_emfcc_edltmaxlh;
+    s2t_edltmaxh = s2g_emfcc_edltmaxhh;
+#endif
+#if JEMFMETHOD_D == u1g_EJCC_OMEGA_D   /*y¸‰Îƒ¢ƒÖ–@z*/
+    s2t_ewmaxlo = s2s_emfng_ewmaxlo;
+    s2t_ewmaxho = s2s_emfng_ewmaxho;
+    s2t_ewmaxl = s2g_emfcc_ewmaxl;
+    s2t_ewmaxh = s2g_emfcc_ewmaxh;
+#endif
+    s2t_espd = s2g_espd_espd;
+    u1t_ejmfne = u1g_emfne_ejmfne;
+    s2t_MFSPD_c = s2g_emfcnt_MFSPD;
+    u1t_CJPMF_c = u1s_emfng_CJPMF;
+
+    if ( u1t_xmfne == (u1)ON )                             /* –{”»’èƒ^ƒCƒ~ƒ“ƒO */
+    {
+        /**********************************************/
+        /* EMˆ«‰»ƒŒƒxƒ‹”»’è—pˆ«˜HƒJƒEƒ“ƒ^A           */
+        /* G”}OTƒŒƒxƒ‹”»’è—pˆ«˜HƒJƒEƒ“ƒ^A           */
+        /* ³í”»’è—pˆ«˜HƒJƒEƒ“ƒ^‚ÌƒJƒEƒ“ƒgƒAƒbƒv’Ê’m */
+        /**********************************************/
+        u2t_ecdtmfwa = u2s_emfng_ecdtmfwa;
+        u1t_ecdtmf2 = u1g_emfng_ecdtmf2;
+        if ( ( u1t_mfkind == u1g_EMFCNT_NOT )          /* ¸‰Î”»’è•s¬—§ */
+          && ( u1t_exjtmf == (u1)OFF )                 /* ¸‰Î‰¼”»’è‹–‰Â */
+#if JEMFHOUKI == u1g_EJCC_USAMF /*y‘Î•Ä–@‹Kz*/
+          && ( big_emfcnt_exptnup == (u1)OFF )
+#endif
+          && ( s2t_espd >= s2t_MFSPD_c ) )
+        {
+            if ( u2t_ecdtmfwa < u2g_U2MAX )
+            {
+                u2t_ecdtmfwa++;
+            }
+            if ( u1t_ecdtmf2 < u1g_U1MAX )
+            {
+                u1t_ecdtmf2++;
+            }
+            emfok_roughcnt();
+        }
+        /* RAMƒf[ƒ^‚ÉŠi”[ */
+        u2s_emfng_ecdtmfwa = u2t_ecdtmfwa;
+        u1g_emfng_ecdtmf2 = u1t_ecdtmf2;
+
+        /*******************************************************/
+        /* ¸‰Î‚Ì‰¼”»’è‹Ö~ƒtƒ‰ƒO,¸‰Î‚Ì–{”»’è‹–‰Âƒtƒ‰ƒO‚Ì‘€ì */
+        /*******************************************************/
+        if ( ( s2t_espd >= s2t_MFSPD_c )
+          && ( ( u1t_mfkind == u1g_EMFCNT_LOW )        /* ’á‰ñ“]‘¤ƒ‰ƒ“ƒ_ƒ€¸‰Î */
+            || ( u1t_mfkind == u1g_EMFCNT_HIGH ) ) )   /* ‚‰ñ“]‘¤ƒ‰ƒ“ƒ_ƒ€¸‰Î */
+        {
+            u1t_exjtmf = (u1)ON;
+            u1t_exjtmf2 = (u1)ON;                      /* XJTMF‚Æ“¯‚ÉON */
+            u1s_emfng_ecjpmf = (u1)0U;                 /* ƒ[ƒƒNƒƒXƒJƒEƒ“ƒ^‚ğƒNƒŠƒA */
+        }
+
+        /**************************************/
+        /* ‰ñ“]•Ï“®—Êƒs[ƒN’l‚Ì—š—ğ‚ÌXVˆ— */
+        /**************************************/
+        if ( ( u1t_mfkind == u1g_EMFCNT_NOT )          /* ¸‰Î”»’è•s¬—§ */
+          && ( u1t_exjtmf == (u1)ON ) )                /* ¸‰Î‰¼”»’è‹Ö~ */
+        {
+            if ( u1t_exjtmf2 == (u1)ON )
+            {
+#if JEMFMETHOD_D == u1g_EJCC_TIME_D    /*y¸‰Îƒ¢T–@z*/
+                s2t_edltmaxlo = s2t_edltmaxl;
+                s2t_edltmaxho = s2t_edltmaxh;
+#endif
+#if JEMFMETHOD_D == u1g_EJCC_OMEGA_D   /*y¸‰Îƒ¢ƒÖ–@z*/
+                s2t_ewmaxlo = s2t_ewmaxl;
+                s2t_ewmaxho = s2t_ewmaxh;
+#endif
+                u1t_exjtmf2 = (u1)OFF;            /* ‰ñ“]•Ï“®—Êƒs[ƒN’l‚Ì—š—ğ‚ÌXVXJTMF2©OFF */
+            }
+            if ( ( u1t_ejmfne == u1g_EMFNE_REV_LOW )
+#if JEMFMETHOD_D == u1g_EJCC_TIME_D    /*y¸‰Îƒ¢T–@z*/
+              && ( s2t_edltmaxlo >= s2t_edltmaxl )     /* ¸‰Î–{”»’è‹–‰Â */
+#endif
+#if JEMFMETHOD_D == u1g_EJCC_OMEGA_D   /*y¸‰Îƒ¢ƒÖ–@z*/
+              && ( s2t_ewmaxlo <= s2t_ewmaxl )         /* ¸‰Î–{”»’è‹–‰Â */
+#endif
+               )
+            {
+#if JEMFMETHOD_D == u1g_EJCC_TIME_D    /*y¸‰Îƒ¢T–@z*/
+                s2t_edltmaxlo = s2t_edltmaxl;
+#endif
+#if JEMFMETHOD_D == u1g_EJCC_OMEGA_D   /*y¸‰Îƒ¢ƒÖ–@z*/
+                s2t_ewmaxlo = s2t_ewmaxl;
+#endif
+                u1t_exjtmf2 = (u1)OFF;            /* ‰ñ“]•Ï“®—Êƒs[ƒN’l‚Ì—š—ğ‚ÌXVXJTMF2©OFF */
+            }
+            if ( ( u1t_ejmfne == u1g_EMFNE_REV_HIGH )
+#if JEMFMETHOD_D == u1g_EJCC_TIME_D    /*y¸‰Îƒ¢T–@z*/
+              && ( s2t_edltmaxho >= s2t_edltmaxh )     /* ¸‰Î–{”»’è‹–‰Â */
+#endif
+#if JEMFMETHOD_D == u1g_EJCC_OMEGA_D   /*y¸‰Îƒ¢ƒÖ–@z*/
+              && ( s2t_ewmaxho <= s2t_ewmaxh )         /* ¸‰Î–{”»’è‹–‰Â */
+#endif
+               )
+            {
+#if JEMFMETHOD_D == u1g_EJCC_TIME_D    /*y¸‰Îƒ¢T–@z*/
+                s2t_edltmaxho = s2t_edltmaxh;
+#endif
+#if JEMFMETHOD_D == u1g_EJCC_OMEGA_D   /*y¸‰Îƒ¢ƒÖ–@z*/
+                s2t_ewmaxho = s2t_ewmaxh;
+#endif
+                u1t_exjtmf2 = (u1)OFF;            /* ‰ñ“]•Ï“®—Êƒs[ƒN’l‚Ì—š—ğ‚ÌXVXJTMF2©OFF */
+            }
+        }
+    }   /* (t_xmfne  ON) end */
+
+    /*******************************************************/
+    /* ¸‰Î‚Ì‰¼”»’è‹Ö~ƒtƒ‰ƒO,¸‰Î‚Ì–{”»’è‹–‰Âƒtƒ‰ƒO‚Ì‘€ì */
+    /*******************************************************/
+    if ( ( s2t_espd < s2t_MFSPD_c )
+      || ( u1s_emfng_ecjpmf >= u1t_CJPMF_c )
+      || ( ( u1t_exjtmf2 == (u1)OFF )
+        && ( ( ( u1t_ejmfne == u1g_EMFNE_REV_LOW )
+#if JEMFMETHOD_D == u1g_EJCC_TIME_D    /*y¸‰Îƒ¢T–@z*/
+            && ( s2t_edltmaxlo < s2t_edltmaxl )
+#endif
+#if JEMFMETHOD_D == u1g_EJCC_OMEGA_D   /*y¸‰Îƒ¢ƒÖ–@z*/
+            && ( s2t_ewmaxlo > s2t_ewmaxl )
+#endif
+             )
+          || ( ( u1t_ejmfne == u1g_EMFNE_REV_HIGH )
+#if JEMFMETHOD_D == u1g_EJCC_TIME_D    /*y¸‰Îƒ¢T–@z*/
+            && ( s2t_edltmaxho < s2t_edltmaxh )
+#endif
+#if JEMFMETHOD_D == u1g_EJCC_OMEGA_D   /*y¸‰Îƒ¢ƒÖ–@z*/
+            && ( s2t_ewmaxho > s2t_ewmaxh )
+#endif
+             ) )
+        && ( u1t_xmfne == (u1)ON )                     /* –{”»’èƒ^ƒCƒ~ƒ“ƒO */
+        && ( u1t_mfkind == u1g_EMFCNT_NOT ) ) )        /* ’á‰ñ“]or‚‰ñ“]¸‰Î”»’è•s¬—§ */
+    {
+        u1t_exjtmf = (u1)OFF;                          /* ¸‰Î‰¼”»’è‹–‰Â */
+        u1s_emfng_ecjpmf = (u1)0U;                     /* ƒ[ƒƒNƒƒXƒJƒEƒ“ƒ^‚ğƒNƒŠƒA */
+    }
+    if ( s2t_espd < s2t_MFSPD_c )
+    {
+        u1t_exjtmf2 = (u1)OFF;                         /* ¸‰Î–{”»’è‹Ö~ */
+    }
+
+    /* RAMƒf[ƒ^‚ÉŠi”[ */
+    glbitcp_bibi( u1t_exjtmf, bis_emfng_exjtmf );
+    glbitcp_bibi( u1t_exjtmf2, bis_emfng_exjtmf2 );
+#if JEMFMETHOD_D == u1g_EJCC_TIME_D    /*y¸‰Îƒ¢T–@z*/
+    s2s_emfng_edltmaxlho = s2t_edltmaxlo;
+    s2s_emfng_edltmaxhho = s2t_edltmaxho;
+#endif
+#if JEMFMETHOD_D == u1g_EJCC_OMEGA_D   /*y¸‰Îƒ¢ƒÖ–@z*/
+    s2s_emfng_ewmaxlo = s2t_ewmaxlo;
+    s2s_emfng_ewmaxho = s2t_ewmaxho;
+#endif
+}
+/**** End of File ****************************************************/
